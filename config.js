@@ -4,4 +4,4 @@
 
 window.API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://localhost:3000'
-    : 'https://carcenter-api.onrender.com'; // <-- REEMPLAZA ESTA URL CON TU URL REAL DE RENDER
+    : 'https://api.accsalcrison.cl';
