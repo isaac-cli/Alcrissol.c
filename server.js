@@ -36,13 +36,18 @@ const REMITENTE = {
 // CONEXIÓN A NEON POSTGRESQL
 // ============================================================
 if (!process.env.DATABASE_URL) {
-    console.error('❌ Falta DATABASE_URL en las variables de entorno. Configúrala en .env (local) o en Render (Environment).');
+    console.error('❌ [ERROR CRÍTICO] Falta la variable DATABASE_URL en las variables de entorno de Render.');
+    console.error('👉 Ingresa al panel de Render > Environment > Add Environment Variable > DATABASE_URL');
     process.exit(1);
 }
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false }
+});
+
+pool.on('error', (err) => {
+    console.error('⚠️ Error inesperado en el cliente PostgreSQL de Neon:', err);
 });
 
 // ============================================================
