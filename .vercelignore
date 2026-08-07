@@ -1,0 +1,18 @@
+# Ignore backend files in frontend deployment (Vercel)
+server.js
+chilexpress.js
+package.json
+package-lock.json
+node_modules/
+import-productos-gary.js
+productos-gary.csv
+contra base de datos carcenter.txt
+test_coverage.js
+test_integration.js
+plan_despliegue.md
+LEEME-DESPLIEGUE.md
+schema.sql
+.env
+.env.example
+.git
+.gitignore

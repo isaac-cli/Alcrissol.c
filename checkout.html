@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Alcrisol Accesorios</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+
+    <style>
+        .checkout-section {
+            padding: 60px 0;
+            background-color: #f8f9fa;
+            min-height: 80vh;
+        }
+
+        .order-summary,
+        .payment-form {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.06);
+        }
+
+        /* ---- Opciones de pago ---- */
+        .pay-option {
+            cursor: pointer;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 18px 20px;
+            transition: all 0.25s;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 12px;
+            background: #fff;
+        }
+
+        .pay-option:hover {
+            border-color: var(--rojo-principal);
+            background: #fff5f5;
+        }
+
+        .pay-option.selected {
+            border-color: var(--rojo-principal);
+            background: #fff5f5;
+            box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.12);
+        }
+
+        .pay-option input[type=radio] {
+            accent-color: var(--rojo-principal);
+            width: 18px;
+            height: 18px;
+        }
+
+        .pay-option img {
+            height: 32px;
+            object-fit: contain;
+        }
+
+        .pay-option .pay-label {
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .pay-option .pay-sub {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* ---- Webpay badge ---- */
+        .webpay-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #e8f4fc;
+            color: #0a5299;
+            border-radius: 8px;
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* ---- Seguridad ---- */
+        .secure-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .secure-chip {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            color: #666;
+        }
+
+        .secure-chip i {
+            color: #28a745;
+        }
+
+        /* ---- Formulario ---- */
+        .form-label {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-control:focus {
+            border-color: var(--rojo-principal);
+            box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.12);
+        }
+
+        /* ---- Spinner ---- */
+        #loading-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #loading-overlay.show {
+            display: flex;
+        }
+
+        .loading-box {
+            background: white;
+            border-radius: 16px;
+            padding: 40px 50px;
+            text-align: center;
+        }
+
+        .loading-box p {
+            margin-top: 15px;
+            font-weight: 600;
+        }
+
+        /* Alerta Transbank */
+        .tbk-info {
+            background: #e8f4fc;
+            border-left: 4px solid #0a5299;
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="main-header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="logo">Alcrisol <span>Accesorios</span></div>
+                <a href="index.html" class="btn btn-outline-danger">
+                    <i class="bi bi-arrow-left"></i> Seguir comprando
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- OVERLAY de carga -->
+    <div id="loading-overlay">
+        <div class="loading-box">
+            <div class="spinner-border text-danger" style="width:3rem;height:3rem;" role="status"></div>
+            <p id="loading-text">Procesando tu pedido…</p>
+        </div>
+    </div>
+
+    <section class="checkout-section">
+        <div class="container">
+            <h2 class="section-title mb-5">Finalizar <span>compra</span></h2>
+
+            <div class="row g-4">
+
+                <!-- ============ COLUMNA IZQUIERDA: Resumen ============ -->
+                <div class="col-lg-5">
+                    <div class="order-summary p-4">
+                        <h5 class="mb-4 border-bottom pb-3">
+                            <i class="bi bi-bag-check text-danger me-2"></i> Tu pedido
+                        </h5>
+
+                        <div id="checkout-items">
+                            <div class="text-center py-4">
+                                <div class="spinner-border text-danger" role="status"></div>
+                                <p class="mt-2 text-muted">Cargando carrito…</p>
+                            </div>
+                        </div>
+
+                        <hr class="my-3">
+
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Subtotal</span>
+                            <span class="fw-bold" id="checkout-subtotal">$0</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-1 text-success">
+                            <span><i class="bi bi-truck"></i> Envío con Chilexpress</span>
+                            <span>GRATIS</span>
+                        </div>
+                        <div class="text-muted" style="font-size:11px;">Se genera tu N° de seguimiento Chilexpress
+                            automáticamente al confirmar el pago.</div>
+                        <hr>
+                        <div class="d-flex justify-content-between fw-bold fs-5">
+                            <span>Total</span>
+                            <span class="text-danger" id="checkout-total">$0</span>
+                        </div>
+
+                        <!-- Cupón -->
+                        <div class="mt-4 p-3 bg-light rounded">
+                            <label class="form-label">¿Tienes un cupón?</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="cupon-input"
+                                    placeholder="Código de descuento">
+                                <button class="btn btn-outline-danger" type="button"
+                                    onclick="aplicarCupon()">Aplicar</button>
+                            </div>
+                            <div id="cupon-msg" class="mt-1" style="font-size:12px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============ COLUMNA DERECHA: Pago + Datos ============ -->
+                <div class="col-lg-7">
+                    <div class="payment-form p-4">
+
+                        <!-- ===== DATOS DE CONTACTO ===== -->
+                        <h5 class="mb-3 border-bottom pb-3">
+                            <i class="bi bi-person-circle text-danger me-2"></i> Datos de contacto
+                        </h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Nombre completo *</label>
+                                <input type="text" class="form-control" id="buyer-name" placeholder="Ej: Juan Pérez">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email *</label>
+                                <input type="email" class="form-control" id="buyer-email"
+                                    placeholder="correo@ejemplo.com">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Teléfono</label>
+                                <input type="tel" class="form-control" id="buyer-phone" placeholder="+56 9 1234 5678">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">RUT</label>
+                                <input type="text" class="form-control" id="buyer-rut" placeholder="11.111.111-1">
+                            </div>
+                        </div>
+
+                        <!-- ===== DIRECCIÓN DE ENVÍO ===== -->
+                        <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                            <h5 class="m-0">
+                                <i class="bi bi-geo-alt text-danger me-2"></i> Dirección de envío
+                            </h5>
+                            <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold shadow-sm" id="btn-geo" onclick="obtenerUbicacionActual()">
+                                <i class="bi bi-crosshair me-1"></i> Detectar mi ubicación
+                            </button>
+                        </div>
+                        <div id="geo-status" class="small mb-3" style="font-size:12px; font-weight:500;"></div>
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <label class="form-label">Calle y número *</label>
+                                <input type="text" class="form-control" id="dir-calle" placeholder="Av. Ejemplo 1234">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Dpto / Oficina / Block</label>
+                                <input type="text" class="form-control" id="dir-calle2" placeholder="Dpto 301">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Región *</label>
+                                <select class="form-control" id="dir-region" onchange="cargarComunasDeRegion()">
+                                    <option value="">Cargando regiones...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Comuna *</label>
+                                <select class="form-control" id="dir-comuna" disabled>
+                                    <option value="">Selecciona una región primero</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Instrucciones de entrega</label>
+                                <input type="text" class="form-control" id="dir-instrucciones"
+                                    placeholder="Ej: Dejar en conserjería">
+                            </div>
+                        </div>
+
+                        <!-- ===== MÉTODO DE PAGO ===== -->
+                        <h5 class="mb-3 border-bottom pb-3">
+                            <i class="bi bi-credit-card text-danger me-2"></i> Método de pago
+                        </h5>
+
+                        <!-- Opción 1: Webpay -->
+                        <label class="pay-option" id="opt-webpay" onclick="seleccionarPago('webpay')">
+                            <input type="radio" name="pago" value="webpay" checked>
+                            <img src="https://www.webpay.cl/o/transbank-landing/img/logo-webpay-plus.png"
+                                onerror="this.style.display='none'" alt="Webpay">
+                            <div>
+                                <div class="pay-label">
+                                    Webpay Plus
+                                    <span class="webpay-badge ms-2"><i class="bi bi-shield-lock-fill"></i>
+                                        Transbank</span>
+                                </div>
+                                <div class="pay-sub">Tarjetas de crédito y débito · Todas las marcas</div>
+                            </div>
+                        </label>
+
+                        <!-- Opción 2: Transferencia -->
+                        <label class="pay-option" id="opt-transferencia" onclick="seleccionarPago('transferencia')">
+                            <input type="radio" name="pago" value="transferencia">
+                            <i class="bi bi-bank2 fs-4 text-primary"></i>
+                            <div>
+                                <div class="pay-label">Transferencia bancaria</div>
+                                <div class="pay-sub">Banco Estado / BCI / Santander — confirmar en 24 hrs</div>
+                            </div>
+                        </label>
+
+                        <!-- Opción 3: Efectivo -->
+                        <label class="pay-option" id="opt-efectivo" onclick="seleccionarPago('efectivo')">
+                            <input type="radio" name="pago" value="efectivo">
+                            <i class="bi bi-cash-stack fs-4 text-success"></i>
+                            <div>
+                                <div class="pay-label">Pago en efectivo al retirar</div>
+                                <div class="pay-sub">Solo retiro en tienda · Santiago</div>
+                            </div>
+                        </label>
+
+                        <!-- Info contextual -->
+                        <div id="info-webpay" class="tbk-info mb-3">
+                            <i class="bi bi-info-circle-fill text-primary me-1"></i>
+                            Serás redirigido al portal seguro de <strong>Transbank</strong> para completar el pago.
+                            Acepta tarjetas Visa, Mastercard, American Express y RedCompra.
+                            <div class="secure-row mt-2">
+                                <span class="secure-chip"><i class="bi bi-lock-fill"></i> SSL 256-bit</span>
+                                <span class="secure-chip"><i class="bi bi-shield-check-fill"></i> 3D Secure</span>
+                                <span class="secure-chip"><i class="bi bi-award-fill"></i> PCI DSS</span>
+                            </div>
+                        </div>
+                        <div id="info-transferencia" class="tbk-info mb-3"
+                            style="display:none; background:#f0f4ff; border-color:#1a56db;">
+                            <i class="bi bi-info-circle-fill me-1" style="color:#1a56db;"></i>
+                            Datos de transferencia:<br>
+                            <strong>Banco:</strong> Banco Estado &nbsp;|&nbsp;
+                            <strong>Cuenta Cte:</strong> 000-000000-00 &nbsp;|&nbsp;
+                            <strong>RUT:</strong> 76.XXX.XXX-X<br>
+                            Envía el comprobante a <strong>pagos@alcrisol.cl</strong>
+                        </div>
+                        <div id="info-efectivo" class="tbk-info mb-3"
+                            style="display:none; background:#f0fff4; border-color:#28a745;">
+                            <i class="bi bi-geo-alt-fill me-1" style="color:#28a745;"></i>
+                            Retira en: <strong>Av. Principal 123, Santiago</strong><br>
+                            Horario: Lun-Vie 9:00 – 18:30 · Sáb 9:00 – 13:00
+                        </div>
+
+                        <!-- Términos -->
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" id="terms">
+                            <label class="form-check-label small" for="terms">
+                                Acepto los <a href="#" class="text-danger">términos y condiciones</a>
+                                y la <a href="#" class="text-danger">política de privacidad</a>
+                            </label>
+                        </div>
+
+                        <!-- BOTÓN PAGAR -->
+                        <button class="btn btn-danger w-100 py-3 fw-bold fs-5" id="btn-pagar" onclick="iniciarPago()">
+                            <i class="bi bi-lock-fill me-2"></i>
+                            <span id="btn-pagar-text">Pagar con Webpay</span>
+                        </button>
+
+                        <!-- Formulario oculto para Transbank (se envía programáticamente) -->
+                        <form id="tbk-form" action="" method="POST" style="display:none;">
+                            <input type="hidden" name="token_ws" id="tbk-token">
+                        </form>
+
+                        <p class="text-center text-muted mt-3" style="font-size:12px;">
+                            <i class="bi bi-lock-fill"></i> Tus datos están protegidos con encriptación SSL
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <footer class="mt-5">
+        <div class="container">
+            <div class="copyright">
+                <p>&copy; 2026 Alcrisol Accesorios – Todos los derechos reservados</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="config.js"></script>
+    <script src="chile-data.js"></script>
+    <script>
+        // ==========================================================
+        // CONFIGURACIÓN
+        // ==========================================================
+        const API_URL = window.API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:3000'
+            : 'https://carcenter-api.onrender.com');
+
+        let pagoSeleccionado = 'webpay';
+        let carritoLocal = [];
+        let totalCompra = 0;
+
+        // ==========================================================
+        // INICIALIZACIÓN
+        // ==========================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarCarrito();
+            inicializarRegiones();
+
+            // Si Transbank rechazó/canceló y volvió
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('pago') === 'rechazado') mostrarAlerta('danger', 'Tu pago fue rechazado por Transbank. Intenta con otro método o tarjeta.');
+            if (params.get('pago') === 'cancelado') mostrarAlerta('warning', 'Cancelaste el pago. Tu pedido sigue guardado.');
+            if (params.get('pago') === 'error') mostrarAlerta('danger', 'Ocurrió un error con Transbank. Intenta nuevamente.');
+        });
+
+        // ==========================================================
+        // CARGAR CARRITO desde localStorage
+        // ==========================================================
+        function cargarCarrito() {
+            carritoLocal = JSON.parse(localStorage.getItem('cart') || '[]');
+
+            if (carritoLocal.length === 0) {
+                alert('Tu carrito está vacío');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const container = document.getElementById('checkout-items');
+            let html = '';
+            let subtotal = 0;
+
+            carritoLocal.forEach(item => {
+                const linea = item.price * item.quantity;
+                subtotal += linea;
+                html += `
+            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                <div>
+                    <div class="fw-bold" style="font-size:14px;">${item.name}</div>
+                    <small class="text-muted">${item.quantity} × $${item.price.toLocaleString('es-CL')}</small>
+                </div>
+                <span class="fw-bold text-danger">$${linea.toLocaleString('es-CL')}</span>
+            </div>`;
+            });
+
+            totalCompra = subtotal;
+            container.innerHTML = html;
+            document.getElementById('checkout-subtotal').textContent = `$${subtotal.toLocaleString('es-CL')}`;
+            document.getElementById('checkout-total').textContent = `$${subtotal.toLocaleString('es-CL')}`;
+        }
+
+        // ==========================================================
+        // SELECCIONAR MÉTODO DE PAGO
+        // ==========================================================
+        function seleccionarPago(metodo) {
+            pagoSeleccionado = metodo;
+
+            // Resaltar opción
+            ['webpay', 'transferencia', 'efectivo'].forEach(m => {
+                document.getElementById(`opt-${m}`)?.classList.toggle('selected', m === metodo);
+                document.getElementById(`info-${m}`) && (document.getElementById(`info-${m}`).style.display = m === metodo ? 'block' : 'none');
+            });
+
+            // Actualizar botón
+            const labels = { webpay: 'Pagar con Webpay', transferencia: 'Confirmar pedido', efectivo: 'Reservar pedido' };
+            document.getElementById('btn-pagar-text').textContent = labels[metodo];
+        }
+
+        // ==========================================================
+        // CARGAR REGIONES Y COMUNAS DINÁMICAS (Chilexpress + Fallback Local)
+        // ==========================================================
+        async function inicializarRegiones() {
+            const regionSelect = document.getElementById('dir-region');
+            regionSelect.innerHTML = '<option value="">Seleccionar…</option>';
+
+            let regiones = [];
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 3000);
+                const resp = await fetch(`${API_URL}/chilexpress/regiones`, { signal: controller.signal });
+                clearTimeout(timeoutId);
+
+                if (resp.ok) {
+                    const data = await resp.json();
+                    regiones = data.regions || (Array.isArray(data) ? data : []);
+                }
+            } catch (err) {
+                console.warn('API de regiones no disponible, utilizando base de datos local:', err.message);
+            }
+
+            if (!regiones || regiones.length === 0) {
+                if (window.CHILE_DATA) {
+                    regiones = window.CHILE_DATA.map(r => ({ regionId: r.id, regionName: r.name }));
+                }
+            }
+
+            if (regiones && regiones.length > 0) {
+                regiones.forEach(reg => {
+                    const opt = document.createElement('option');
+                    opt.value = reg.regionId || reg.id;
+                    opt.textContent = reg.regionName || reg.name;
+                    regionSelect.appendChild(opt);
+                });
+            } else {
+                mostrarAlerta('danger', 'Error al cargar regiones.');
+            }
+        }
+
+        async function cargarComunasDeRegion(regionIdSeleccionada) {
+            const regionSelect = document.getElementById('dir-region');
+            const regionId = regionIdSeleccionada || regionSelect.value;
+            const comunaSelect = document.getElementById('dir-comuna');
+            
+            if (!regionId) {
+                comunaSelect.innerHTML = '<option value="">Selecciona una región primero</option>';
+                comunaSelect.disabled = true;
+                return;
+            }
+            
+            comunaSelect.innerHTML = '<option value="">Cargando comunas...</option>';
+            comunaSelect.disabled = true;
+            
+            let comunas = [];
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 3000);
+                const resp = await fetch(`${API_URL}/chilexpress/comunas/${regionId}`, { signal: controller.signal });
+                clearTimeout(timeoutId);
+
+                if (resp.ok) {
+                    const data = await resp.json();
+                    comunas = data.coverageAreas || (Array.isArray(data) ? data : []);
+                }
+            } catch (err) {
+                console.warn('API de comunas no disponible, utilizando base de datos local:', err.message);
+            }
+
+            if (!comunas || comunas.length === 0) {
+                if (window.CHILE_DATA) {
+                    const regLocal = window.CHILE_DATA.find(r => r.id === regionId);
+                    if (regLocal && regLocal.comunas) {
+                        comunas = regLocal.comunas.map(c => ({ countyCode: c.code, countyName: c.name }));
+                    }
+                }
+            }
+
+            if (comunas && comunas.length > 0) {
+                const unicas = [];
+                const vistos = new Set();
+                comunas.forEach(com => {
+                    const code = com.countyCode || com.code;
+                    const name = com.countyName || com.name;
+                    if (code && name && !vistos.has(code + '-' + name)) {
+                        vistos.add(code + '-' + name);
+                        unicas.push({ countyCode: code, countyName: name });
+                    }
+                });
+
+                unicas.sort((a, b) => a.countyName.localeCompare(b.countyName));
+
+                comunaSelect.innerHTML = '<option value="">Seleccionar…</option>';
+                unicas.forEach(com => {
+                    const opt = document.createElement('option');
+                    opt.value = com.countyCode;
+                    opt.textContent = com.countyName;
+                    comunaSelect.appendChild(opt);
+                });
+                comunaSelect.disabled = false;
+            } else {
+                comunaSelect.innerHTML = '<option value="">No se encontraron comunas</option>';
+            }
+        }
+
+        // ==========================================================
+        // GEOLOCALIZACIÓN AUTOMÁTICA Y MATCHING
+        // ==========================================================
+        function normalizarTexto(str) {
+            if (!str) return '';
+            return str.toLowerCase()
+                .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                .replace(/region de /gi, "")
+                .replace(/region del /gi, "")
+                .replace(/region /gi, "")
+                .replace(/ de /gi, " ")
+                .replace(/ del /gi, " ")
+                .trim();
+        }
+
+        async function obtenerUbicacionActual() {
+            const btn = document.getElementById('btn-geo');
+            const status = document.getElementById('geo-status');
+            
+            if (!navigator.geolocation) {
+                mostrarAlerta('warning', 'Tu navegador no soporta geolocalización. Selecciona tu región y comuna manualmente.');
+                return;
+            }
+
+            btn.disabled = true;
+            const origHtml = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Geolocalizando…';
+            if (status) status.innerHTML = '<i class="bi bi-compass text-danger me-1"></i> Obteniendo coordenadas GPS...';
+
+            navigator.geolocation.getCurrentPosition(
+                async (pos) => {
+                    const lat = pos.coords.latitude;
+                    const lon = pos.coords.longitude;
+                    
+                    try {
+                        if (status) status.innerHTML = '<i class="bi bi-search text-danger me-1"></i> Buscando comuna y región...';
+                        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`);
+                        if (!res.ok) throw new Error('Servicio de geocodificación no respondió');
+                        
+                        const data = await res.json();
+                        const addr = data.address || {};
+                        
+                        const rawComuna = addr.city || addr.town || addr.suburb || addr.municipality || addr.county || addr.district || addr.village || '';
+                        const rawRegion = addr.state || addr.region || '';
+                        const calleNombre = addr.road || addr.pedestrian || addr.street || '';
+                        const calleNumero = addr.house_number || '';
+                        
+                        if (calleNombre && document.getElementById('dir-calle')) {
+                            document.getElementById('dir-calle').value = `${calleNombre} ${calleNumero}`.trim();
+                        }
+
+                        const exito = await seleccionarRegionYComunaPorTexto(rawRegion, rawComuna);
+                        
+                        if (exito) {
+                            const desc = [rawComuna, rawRegion].filter(Boolean).join(', ');
+                            if (status) status.innerHTML = `<span class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i> Ubicación detectada: ${desc}</span>`;
+                            mostrarAlerta('success', `📍 Ubicación detectada: ${desc}`);
+                        } else {
+                            if (status) status.innerHTML = '<span class="text-warning fw-bold"><i class="bi bi-info-circle-fill me-1"></i> Ubicación GPS obtenida. Selecciona tu comuna en los desplegables.</span>';
+                            mostrarAlerta('info', 'Ubicación obtenida. Por favor confirma tu región y comuna en el formulario.');
+                        }
+                    } catch (err) {
+                        console.error('Error al reversar geolocalización:', err);
+                        if (status) status.innerHTML = '<span class="text-secondary"><i class="bi bi-info-circle me-1"></i> No se pudo obtener el nombre automático. Selecciona tu comuna.</span>';
+                        mostrarAlerta('info', 'Ubicación obtenida. Por favor selecciona tu región y comuna manualmente.');
+                    } finally {
+                        btn.disabled = false;
+                        btn.innerHTML = origHtml;
+                    }
+                },
+                (err) => {
+                    console.error('Error navigator.geolocation:', err);
+                    btn.disabled = false;
+                    btn.innerHTML = origHtml;
+                    if (status) status.innerHTML = '';
+                    let msj = 'No se pudo obtener la geolocalización.';
+                    if (err.code === err.PERMISSION_DENIED) {
+                        msj = 'Permiso de ubicación denegado por el navegador. Selecciona tu región y comuna manualmente.';
+                    }
+                    mostrarAlerta('warning', msj);
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+            );
+        }
+
+        async function seleccionarRegionYComunaPorTexto(rawRegion, rawComuna) {
+            const regionSelect = document.getElementById('dir-region');
+            const normRegion = normalizarTexto(rawRegion);
+            const normComuna = normalizarTexto(rawComuna);
+
+            let regionEncontrada = null;
+
+            for (let i = 0; i < regionSelect.options.length; i++) {
+                const opt = regionSelect.options[i];
+                if (!opt.value) continue;
+                const optTextNorm = normalizarTexto(opt.textContent);
+
+                if (optTextNorm.includes(normRegion) || normRegion.includes(optTextNorm) ||
+                    (normRegion.includes('metropolitana') && optTextNorm.includes('metropolitana')) ||
+                    (normRegion.includes('santiago') && optTextNorm.includes('metropolitana')) ||
+                    (normRegion.includes('valparaiso') && optTextNorm.includes('valparaiso')) ||
+                    (normRegion.includes('biobio') && optTextNorm.includes('biobio')) ||
+                    (normRegion.includes('araucania') && optTextNorm.includes('araucania')) ||
+                    (normRegion.includes('coquimbo') && optTextNorm.includes('coquimbo'))) {
+                    regionEncontrada = opt.value;
+                    regionSelect.selectedIndex = i;
+                    break;
+                }
+            }
+
+            if (!regionEncontrada && window.CHILE_DATA && normComuna) {
+                for (const reg of window.CHILE_DATA) {
+                    const comMatch = reg.comunas.find(c => normalizarTexto(c.name) === normComuna || normComuna.includes(normalizarTexto(c.name)));
+                    if (comMatch) {
+                        regionEncontrada = reg.id;
+                        regionSelect.value = reg.id;
+                        break;
+                    }
+                }
+            }
+
+            if (!regionEncontrada) return false;
+
+            await cargarComunasDeRegion(regionEncontrada);
+
+            const comunaSelect = document.getElementById('dir-comuna');
+            let comunaEncontrada = false;
+
+            if (normComuna) {
+                for (let i = 0; i < comunaSelect.options.length; i++) {
+                    const opt = comunaSelect.options[i];
+                    if (!opt.value) continue;
+                    const optTextNorm = normalizarTexto(opt.textContent);
+
+                    if (optTextNorm === normComuna || normComuna.includes(optTextNorm) || optTextNorm.includes(normComuna)) {
+                        comunaSelect.selectedIndex = i;
+                        comunaEncontrada = true;
+                        break;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        // ==========================================================
+        // VALIDACIONES
+        // ==========================================================
+        function validar() {
+            const nombre = document.getElementById('buyer-name').value.trim();
+            const email = document.getElementById('buyer-email').value.trim();
+            const calle = document.getElementById('dir-calle').value.trim();
+            const comuna = document.getElementById('dir-comuna').value;
+            const region = document.getElementById('dir-region').value;
+            const terms = document.getElementById('terms').checked;
+
+            if (!nombre) { mostrarAlerta('danger', 'Ingresa tu nombre completo'); return false; }
+            if (!email.includes('@')) { mostrarAlerta('danger', 'Ingresa un email válido'); return false; }
+            if (!calle) { mostrarAlerta('danger', 'Ingresa tu dirección'); return false; }
+            if (!comuna) { mostrarAlerta('danger', 'Selecciona tu comuna'); return false; }
+            if (!region) { mostrarAlerta('danger', 'Selecciona tu región'); return false; }
+            if (!terms) { mostrarAlerta('danger', 'Debes aceptar los términos y condiciones'); return false; }
+            return true;
+        }
+
+        // ==========================================================
+        // CREAR PEDIDO EN LA BD
+        // ==========================================================
+        async function crearPedidoEnBD() {
+            const regionSelect = document.getElementById('dir-region');
+            const comunaSelect = document.getElementById('dir-comuna');
+            
+            const body = {
+                nombre: document.getElementById('buyer-name').value.trim(),
+                email: document.getElementById('buyer-email').value.trim(),
+                telefono: document.getElementById('buyer-phone').value.trim(),
+                nit: document.getElementById('buyer-rut').value.trim(),
+                metodo_pago: pagoSeleccionado,
+                total: totalCompra,
+                items: carritoLocal,
+                direccion: {
+                    calle: document.getElementById('dir-calle').value.trim(),
+                    calle2: document.getElementById('dir-calle2').value.trim(),
+                    comuna: comunaSelect.options[comunaSelect.selectedIndex].text,
+                    region: regionSelect.options[regionSelect.selectedIndex].text,
+                    coverage_code: comunaSelect.value,
+                    instrucciones: document.getElementById('dir-instrucciones').value.trim()
+                }
+            };
+
+            const resp = await fetch(`${API_URL}/pedidos`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+
+            if (!resp.ok) throw new Error('No se pudo crear el pedido');
+            return await resp.json(); // { pedido_id, orden }
+        }
+
+        // ==========================================================
+        // INICIAR PAGO (botón principal)
+        // ==========================================================
+        async function iniciarPago() {
+            if (!validar()) return;
+
+            mostrarLoading('Creando tu pedido…');
+
+            try {
+                // 1. Guardar pedido en la BD
+                const { pedido_id, orden } = await crearPedidoEnBD();
+
+                if (pagoSeleccionado === 'webpay') {
+                    // 2a. Webpay: pedir token a nuestra API
+                    actualizarLoadingText('Conectando con Transbank…');
+
+                    const tbkResp = await fetch(`${API_URL}/transbank/crear`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ pedido_id, monto: totalCompra })
+                    });
+
+                    if (!tbkResp.ok) throw new Error('Error al crear transacción Transbank');
+                    const { url, token } = await tbkResp.json();
+
+                    // 3. Limpiar carrito y redirigir a Webpay
+                    localStorage.removeItem('cart');
+
+                    actualizarLoadingText('Redirigiendo a Webpay…');
+                    document.getElementById('tbk-form').action = url;
+                    document.getElementById('tbk-token').value = token;
+                    document.getElementById('tbk-form').submit();
+
+                } else {
+                    // 2b. Efectivo / Transferencia: solo guardar y confirmar
+                    localStorage.removeItem('cart');
+                    ocultarLoading();
+                    window.location.href = `gracias.html?orden=${orden}&total=${totalCompra}&tipo=${pagoSeleccionado}`;
+                }
+
+            } catch (err) {
+                console.error(err);
+                ocultarLoading();
+                mostrarAlerta('danger', 'Ocurrió un error. Intenta nuevamente o contáctanos.');
+            }
+        }
+
+        // ==========================================================
+        // CUPÓN (placeholder, conecta con tu lógica backend)
+        // ==========================================================
+        function aplicarCupon() {
+            const codigo = document.getElementById('cupon-input').value.trim().toUpperCase();
+            const msg = document.getElementById('cupon-msg');
+            if (codigo === 'CARCENTER10') {
+                const descuento = Math.round(totalCompra * 0.10);
+                totalCompra -= descuento;
+                document.getElementById('checkout-total').textContent = `$${totalCompra.toLocaleString('es-CL')}`;
+                msg.innerHTML = `<span class="text-success"><i class="bi bi-check-circle-fill"></i> ¡10% de descuento aplicado! -$${descuento.toLocaleString('es-CL')}</span>`;
+            } else {
+                msg.innerHTML = `<span class="text-danger"><i class="bi bi-x-circle-fill"></i> Código no válido</span>`;
+            }
+        }
+
+        // ==========================================================
+        // HELPERS DE UI
+        // ==========================================================
+        function mostrarLoading(texto) {
+            document.getElementById('loading-text').textContent = texto;
+            document.getElementById('loading-overlay').classList.add('show');
+        }
+        function actualizarLoadingText(texto) {
+            document.getElementById('loading-text').textContent = texto;
+        }
+        function ocultarLoading() {
+            document.getElementById('loading-overlay').classList.remove('show');
+        }
+        function mostrarAlerta(tipo, mensaje) {
+            let alerta = document.getElementById('alerta-global');
+            if (!alerta) {
+                alerta = document.createElement('div');
+                alerta.id = 'alerta-global';
+                alerta.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:99999;min-width:320px;max-width:90vw;';
+                document.body.appendChild(alerta);
+            }
+            alerta.innerHTML = `<div class="alert alert-${tipo} alert-dismissible shadow">
+        ${mensaje}
+        <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
+    </div>`;
+        }
+
+        // Inicializar opción seleccionada
+        seleccionarPago('webpay');
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

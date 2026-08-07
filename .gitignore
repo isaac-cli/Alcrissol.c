@@ -1,0 +1,24 @@
+# ============================================================
+# ARCHIVOS QUE NUNCA DEBEN SUBIRSE A GITHUB
+# ============================================================
+
+# Variables de entorno (¡contienen credenciales reales!)
+.env
+
+# Archivo con la contraseña de Neon en texto plano — no debe subirse a GitHub
+"contra base de datos carcenter.txt"
+
+# Dependencias de Node (se instalan con "npm install")
+node_modules/
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Cache
+.cache/
+dist/
