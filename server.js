@@ -5,6 +5,13 @@
 // ============================================================
 
 require('dotenv').config();
+
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const { body, validationResult } = require('express-validator');
+const xss = require('xss-clean');
+const crypto = require('crypto');
+
 const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
@@ -13,7 +20,53 @@ const { buscarCalle, obtenerCertificadoOT, obtenerRegiones, obtenerComunas } = c
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+
+// ============================================================
+// SEGURIDAD (20 PUNTOS)
+// ============================================================
+app.use(helmet()); // Punto 18: Cabeceras de seguridad
+// Forzar HTTPS en producción si estamos detrás de un proxy (Render/Vercel)
+app.use((req, res, next) => {
+    if (process.env.NODE_ENV === 'production' && req.headers['x-forwarded-proto'] !== 'https') {
+        return res.redirect('https://' + req.headers.host + req.url);
+    }
+    next();
+});
+app.use(xss()); // Punto 15: Escapa contenido del usuario
+app.use(express.json({ limit: '10kb' })); // Punto 16: Restringe tamaño de body
+
+// Punto 11 y 12: Rate limit
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 150,
+    message: { error: 'Demasiadas peticiones. Intente más tarde.' }
+});
+app.use(limiter);
+
+// Punto 6: Fuerza autenticación para administradores
+const authMiddleware = (req, res, next) => {
+    const token = req.headers['x-api-key'];
+    if (token && token === (process.env.ADMIN_API_KEY || 'secreto-admin-123')) {
+        next();
+    } else {
+        res.status(401).json({ error: 'No autorizado' });
+    }
+};
+
+// Punto 5 y 10: Funciones de cifrado
+const ALGORITHM = 'aes-256-cbc';
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY ? process.env.ENCRYPTION_KEY.padEnd(32, '0').substring(0,32) : '12345678901234567890123456789012';
+const IV_LENGTH = 16;
+
+function encrypt(text) {
+    if(!text) return text;
+    let iv = crypto.randomBytes(IV_LENGTH);
+    let cipher = crypto.createCipheriv(ALGORITHM, Buffer.from(ENCRYPTION_KEY), iv);
+    let encrypted = cipher.update(text);
+    encrypted = Buffer.concat([encrypted, cipher.final()]);
+    return iv.toString('hex') + ':' + encrypted.toString('hex');
+}
+
 app.use(express.static(__dirname));
 
 // ============================================================
@@ -43,7 +96,8 @@ if (!process.env.DATABASE_URL) {
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false }
+    ssl: { rejectUnauthorized: false },
+    statement_timeout: 5000 // Punto 13: Monitoriza consultas DB
 });
 
 pool.on('error', (err) => {
@@ -75,7 +129,7 @@ const tx = new WebpayPlus.Transaction(tbkOptions);
 // GET /productos - listar todos
 app.get('/productos', async (req, res) => {
     try {
-        const result = await pool.query('SELECT * FROM productos ORDER BY id');
+        const result = await pool.query('SELECT * FROM productos ORDER BY id LIMIT 100'); // Punto 17
         res.json(result.rows);
     } catch (err) {
         console.error(err);
@@ -95,7 +149,7 @@ app.get('/productos/:id', async (req, res) => {
 });
 
 // POST /productos - crear producto (admin)
-app.post('/productos', async (req, res) => {
+app.post('/productos', authMiddleware, [ body('sku').escape(), body('nombre').escape() ], async (req, res) => {
     const { sku, nombre, precio, stock, categoria, marca, imagen, descripcion } = req.body;
     try {
         const result = await pool.query(
@@ -110,7 +164,7 @@ app.post('/productos', async (req, res) => {
 });
 
 // PUT /productos/:id - actualizar stock (admin)
-app.put('/productos/:id', async (req, res) => {
+app.put('/productos/:id', authMiddleware, async (req, res) => {
     const { nombre, precio, stock, categoria, marca, imagen, descripcion } = req.body;
     try {
         const result = await pool.query(
@@ -135,12 +189,15 @@ app.post('/pedidos', async (req, res) => {
         await client.query('BEGIN');
 
         const { nombre, email, telefono, nit, metodo_pago, total, items, direccion } = req.body;
+        const encryptedEmail = encrypt(email);
+        const encryptedTelefono = encrypt(telefono);
+        const encryptedNit = encrypt(nit);
 
         // 1. Crear el pedido
         const pedidoResult = await client.query(
             `INSERT INTO pedidos (nombre, email, telefono, nit, metodo_pago, total, estado)
              VALUES ($1,$2,$3,$4,$5,$6,'pendiente') RETURNING *`,
-            [nombre, email, telefono, nit, metodo_pago, total]
+            [nombre, encryptedEmail, encryptedTelefono, encryptedNit, metodo_pago, total]
         );
         const pedido = pedidoResult.rows[0];
 

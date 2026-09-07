@@ -28,10 +28,10 @@
   <div class="top-header">
     <div class="container">
       <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-6 text-center text-md-start mb-1 mb-md-0">
           <i class="bi bi-truck"></i> Envíos a todo Chile
         </div>
-        <div class="col-md-6 text-end">
+        <div class="col-md-6 text-center text-md-end">
           <i class="bi bi-telephone"></i> +56 2 1234 5678
         </div>
       </div>
@@ -98,10 +98,11 @@
           </div>
         </div>
 
-        <div class="col-lg-6">
+        <div class="col-lg-6 d-none d-lg-block">
           <div class="hero-image position-relative" data-aos="fade-left" data-aos-delay="200">
             <!-- ✅ IMAGEN DE LA SILVERADO SIN FONDO -->
-            <img src="Chevrolet Silverado.avif" alt="Chevrolet Silverado Z71" class="img-fluid silverado-img" loading="lazy" onerror="this.src='https://via.placeholder.com/600x350?text=Alcrisol+Accesorios'">
+            <img src="Chevrolet Silverado.avif" alt="Chevrolet Silverado Z71" class="img-fluid silverado-img"
+              loading="lazy" onerror="this.src='https://via.placeholder.com/600x350?text=Alcrisol+Accesorios'">
 
             <!-- Cuadros de productos flotantes (los dejamos porque se ven bien) -->
             <div class="floating-product fp-1" data-aos="zoom-in" data-aos-delay="400">
@@ -122,203 +123,6 @@
       </div>
     </div>
   </section>
-  <!-- PLUGIN BUSCADOR POR VEHÍCULO -->
-  <section id="buscador" class="plugin-section">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-5" data-aos="fade-right">
-          <span class="plugin-badge">Buscador inteligente</span>
-          <h2 class="plugin-title">Plugin para buscar productos según el vehículo</h2>
-          <p class="plugin-description">Selecciona la marca, modelo y año de tu vehículo para encontrar exactamente los
-            repuestos compatibles. Filtro inteligente en tiempo real.</p>
-
-          <div class="vehicle-filter">
-            <div class="filter-row">
-              <div class="filter-group">
-                <label><i class="bi bi-tag"></i> Marca</label>
-                <select class="filter-select" id="marca">
-                  <option value="">Seleccionar marca</option>
-                  <option value="chevrolet">Chevrolet</option>
-                  <option value="ford">Ford</option>
-                  <option value="toyota">Toyota</option>
-                  <option value="nissan">Nissan</option>
-                  <option value="hyundai">Hyundai</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="filter-row">
-              <div class="filter-group">
-                <label><i class="bi bi-car-front"></i> Modelo</label>
-                <select class="filter-select" id="modelo">
-                  <option value="">Seleccionar modelo</option>
-                  <option value="silverado">Silverado</option>
-                  <option value="cruze">Cruze</option>
-                  <option value="onix">Onix</option>
-                </select>
-              </div>
-
-              <div class="filter-group">
-                <label><i class="bi bi-calendar"></i> Año</label>
-                <select class="filter-select" id="anio">
-                  <option value="">Seleccionar año</option>
-                  <option value="2024">2024</option>
-                  <option value="2023">2023</option>
-                  <option value="2022">2022</option>
-                  <option value="2021">2021</option>
-                  <option value="2020">2020</option>
-                </select>
-              </div>
-            </div>
-
-            <button class="btn-filter" id="btnBuscar">
-              <i class="bi bi-search"></i> Buscar productos compatibles
-            </button>
-
-            <div class="filter-note" id="resultadoBusqueda">
-              <i class="bi bi-check-circle"></i> Más de 10,000 productos compatibles disponibles
-            </div>
-          </div>
-        </div>
-
-        <!-- BENEFICIOS DE ALCONSOL ACCESORIOS -->
-        <div class="col-lg-7">
-          <div class="row g-4">
-            <!-- Beneficio 1: Envío gratis -->
-            <div class="col-md-6" data-aos="fade-up" data-aos-delay="100">
-              <div class="benefit-card">
-                <div class="benefit-icon">
-                  <i class="bi bi-truck"></i>
-                </div>
-                <h3>Envío a todo Chile</h3>
-                <p>Despachamos a todas las regiones en 24-72 hrs</p>
-                <span class="benefit-tag">¡Gratis sobre $50.000!</span>
-              </div>
-            </div>
-
-            <!-- Beneficio 2: Garantía -->
-            <div class="col-md-6" data-aos="fade-up" data-aos-delay="200">
-              <div class="benefit-card">
-                <div class="benefit-icon">
-                  <i class="bi bi-shield-check"></i>
-                </div>
-                <h3>Garantía extendida</h3>
-                <p>Todos nuestros productos tienen garantía</p>
-                <span class="benefit-tag">6 meses directos</span>
-              </div>
-            </div>
-
-            <!-- Beneficio 3: Pago seguro -->
-            <div class="col-md-6" data-aos="fade-up" data-aos-delay="300">
-              <div class="benefit-card">
-                <div class="benefit-icon">
-                  <i class="bi bi-credit-card"></i>
-                </div>
-                <h3>Pagos online</h3>
-                <p>Aceptamos tarjetas, transferencias y efectivo</p>
-                <span class="benefit-tag">Webpay + MercadoPago</span>
-              </div>
-            </div>
-
-            <!-- Beneficio 4: Whatsapp -->
-            <div class="col-md-6" data-aos="fade-up" data-aos-delay="400">
-              <div class="benefit-card">
-                <div class="benefit-icon">
-                  <i class="bi bi-whatsapp"></i>
-                </div>
-                <h3>Atención personalizada</h3>
-                <p>Resolvemos tus dudas al instante</p>
-                <span class="benefit-tag">+56 9 1234 5678</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- RESEÑAS DE CLIENTES -->
-  <section class="reviews-section">
-        <div class="container">
-          <h2 class="section-title text-center" data-aos="fade-up">Lo que dicen <span>nuestros clientes</span></h2>
-          <p class="text-center text-muted mb-5" data-aos="fade-up">Más de 150 compras confían en nosotros</p>
-
-          <div class="row g-4">
-            <!-- Reseña 1 -->
-            <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="100">
-              <div class="review-card-big">
-                <div class="review-header">
-                  <img
-                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50' viewBox='0 0 50 50'%3E%3Ccircle cx='25' cy='25' r='25' fill='%23D32F2F'/%3E%3Ctext x='15' y='32' fill='%23fff' font-size='20'%3EC%3C/text%3E%3C/svg%3E"
-                    alt="Cliente">
-                  <div>
-                    <h5>Carlos Rodríguez</h5>
-                    <div class="stars">★★★★★</div>
-                  </div>
-                </div>
-                <p class="review-text">"Excelente atención, compré neumáticos para mi Silverado y llegaron al día
-                  siguiente. 100% recomendable."</p>
-                <span class="review-date">Compra verificada - Hace 2 semanas</span>
-              </div>
-            </div>
-
-            <!-- Reseña 2 -->
-            <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="200">
-              <div class="review-card-big">
-                <div class="review-header">
-                  <img
-                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50' viewBox='0 0 50 50'%3E%3Ccircle cx='25' cy='25' r='25' fill='%23D32F2F'/%3E%3Ctext x='15' y='32' fill='%23fff' font-size='20'%3EM%3C/text%3E%3C/svg%3E"
-                    alt="Cliente">
-                  <div>
-                    <h5>María González</h5>
-                    <div class="stars">★★★★★</div>
-                  </div>
-                </div>
-                <p class="review-text">"Las plumillas Wurth son excelentes, y el precio mucho mejor que en otras
-                  tiendas. Volveré a comprar."</p>
-                <span class="review-date">Compra verificada - Hace 1 semana</span>
-              </div>
-            </div>
-
-            <!-- Reseña 3 -->
-            <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="300">
-              <div class="review-card-big">
-                <div class="review-header">
-                  <img
-                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50' viewBox='0 0 50 50'%3E%3Ccircle cx='25' cy='25' r='25' fill='%23D32F2F'/%3E%3Ctext x='15' y='32' fill='%23fff' font-size='20'%3EJ%3C/text%3E%3C/svg%3E"
-                    alt="Cliente">
-                  <div>
-                    <h5>Juan Pérez</h5>
-                    <div class="stars">★★★★☆</div>
-                  </div>
-                </div>
-                <p class="review-text">"Buena variedad de aceites, encontré justo el Motul que necesitaba para mi auto.
-                  Recomendado."</p>
-                <span class="review-date">Compra verificada - Hace 3 días</span>
-              </div>
-            </div>
-
-            <!-- Reseña 4 -->
-            <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="400">
-              <div class="review-card-big">
-                <div class="review-header">
-                  <img
-                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50' viewBox='0 0 50 50'%3E%3Ccircle cx='25' cy='25' r='25' fill='%23D32F2F'/%3E%3Ctext x='15' y='32' fill='%23fff' font-size='20'%3EP%3C/text%3E%3C/svg%3E"
-                    alt="Cliente">
-                  <div>
-                    <h5>Patricia Soto</h5>
-                    <div class="stars">★★★★★</div>
-                  </div>
-                </div>
-                <p class="review-text">"Responden rápido por WhatsApp y me ayudaron a elegir la ampolleta LED correcta.
-                  Muy buena atención."</p>
-                <span class="review-date">Compra verificada - Hace 5 días</span>
-              </div>
-            </div>
-          </div>
-        </div>
-  </section>
-
   <!-- MARCAS -->
   <section id="marcas" class="brands-section">
     <div class="container">
@@ -426,6 +230,120 @@
     </div>
   </section>
 
+  <!-- PLUGIN BUSCADOR POR VEHÍCULO -->
+  <section id="buscador" class="plugin-section">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-5" data-aos="fade-right">
+          <span class="plugin-badge">Búsqueda Rápida</span>
+          <h2 class="plugin-title">Encuentra repuestos exactos para tu vehículo</h2>
+          <p class="plugin-description">Filtra nuestro inventario por tu vehículo para asegurar la compatibilidad.</p>
+
+          <div class="vehicle-filter">
+            <div class="filter-row">
+              <div class="filter-group">
+                <label><i class="bi bi-tag"></i> Marca</label>
+                <select class="filter-select" id="marca">
+                  <option value="">Seleccionar marca</option>
+                  <option value="chevrolet">Chevrolet</option>
+                  <option value="ford">Ford</option>
+                  <option value="toyota">Toyota</option>
+                  <option value="nissan">Nissan</option>
+                  <option value="hyundai">Hyundai</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="filter-row">
+              <div class="filter-group">
+                <label><i class="bi bi-car-front"></i> Modelo</label>
+                <select class="filter-select" id="modelo">
+                  <option value="">Seleccionar modelo</option>
+                  <option value="silverado">Silverado</option>
+                  <option value="cruze">Cruze</option>
+                  <option value="onix">Onix</option>
+                </select>
+              </div>
+
+              <div class="filter-group">
+                <label><i class="bi bi-calendar"></i> Año</label>
+                <select class="filter-select" id="anio">
+                  <option value="">Seleccionar año</option>
+                  <option value="2024">2024</option>
+                  <option value="2023">2023</option>
+                  <option value="2022">2022</option>
+                  <option value="2021">2021</option>
+                  <option value="2020">2020</option>
+                </select>
+              </div>
+            </div>
+
+            <button class="btn-filter" id="btnBuscar">
+              <i class="bi bi-search"></i> Buscar productos compatibles
+            </button>
+
+            <div class="filter-note" id="resultadoBusqueda">
+              <i class="bi bi-check-circle"></i> Más de 10,000 productos compatibles disponibles
+            </div>
+          </div>
+        </div>
+
+        <!-- BENEFICIOS DE ALCONSOL ACCESORIOS -->
+        <div class="col-lg-7">
+          <div class="row g-4">
+            <!-- Beneficio 1: Envío gratis -->
+            <div class="col-md-6" data-aos="fade-up" data-aos-delay="100">
+              <div class="benefit-card">
+                <div class="benefit-icon">
+                  <i class="bi bi-truck"></i>
+                </div>
+                <h3>Envío a todo Chile</h3>
+                <p>Despachamos a todas las regiones en 24-72 hrs</p>
+                <span class="benefit-tag">¡Gratis sobre $50.000!</span>
+              </div>
+            </div>
+
+            <!-- Beneficio 2: Garantía -->
+            <div class="col-md-6" data-aos="fade-up" data-aos-delay="200">
+              <div class="benefit-card">
+                <div class="benefit-icon">
+                  <i class="bi bi-shield-check"></i>
+                </div>
+                <h3>Garantía extendida</h3>
+                <p>Todos nuestros productos tienen garantía</p>
+                <span class="benefit-tag">6 meses directos</span>
+              </div>
+            </div>
+
+            <!-- Beneficio 3: Pago seguro -->
+            <div class="col-md-6" data-aos="fade-up" data-aos-delay="300">
+              <div class="benefit-card">
+                <div class="benefit-icon">
+                  <i class="bi bi-credit-card"></i>
+                </div>
+                <h3>Pagos online</h3>
+                <p>Aceptamos tarjetas, transferencias y efectivo</p>
+                <span class="benefit-tag">Webpay + MercadoPago</span>
+              </div>
+            </div>
+
+            <!-- Beneficio 4: Whatsapp -->
+            <div class="col-md-6" data-aos="fade-up" data-aos-delay="400">
+              <div class="benefit-card">
+                <div class="benefit-icon">
+                  <i class="bi bi-whatsapp"></i>
+                </div>
+                <h3>Atención personalizada</h3>
+                <p>Resolvemos tus dudas al instante</p>
+                <span class="benefit-tag">+56 9 1234 5678</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- OFERTAS ESPECIALES -->
   <section id="ofertas" class="offers-section">
     <div class="container">
@@ -438,7 +356,7 @@
             <div class="offer-discount">30% OFF</div>
             <h3 class="offer-title">Kit de Frenos Completo</h3>
             <p>Pastillas + Discos para Chevrolet Silverado</p>
-            <a href="#" class="btn-offer">Ver oferta</a>
+            <a href="javascript:void(0)" onclick="filtrarPorCategoria('ofertas')" class="btn-offer">Ver oferta</a>
           </div>
         </div>
 
@@ -448,7 +366,7 @@
             <div class="offer-discount">20% OFF</div>
             <h3 class="offer-title">Aceite Motor 5W30</h3>
             <p>Lubricante sintético de alta performance</p>
-            <a href="#" class="btn-offer">Ver oferta</a>
+            <a href="javascript:void(0)" onclick="filtrarPorCategoria('ofertas')" class="btn-offer">Ver oferta</a>
           </div>
         </div>
 
@@ -458,7 +376,89 @@
             <div class="offer-discount">2x1</div>
             <h3 class="offer-title">Filtros de Aire</h3>
             <p>Compra 1 y llévate el segundo gratis</p>
-            <a href="#" class="btn-offer">Ver oferta</a>
+            <a href="javascript:void(0)" onclick="filtrarPorCategoria('ofertas')" class="btn-offer">Ver oferta</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESEÑAS DE CLIENTES -->
+  <section class="reviews-section d-none d-lg-block">
+    <div class="container">
+      <h2 class="section-title text-center" data-aos="fade-up">Lo que dicen <span>nuestros clientes</span></h2>
+      <p class="text-center text-muted mb-5" data-aos="fade-up">Más de 150 compras confían en nosotros</p>
+
+      <div class="row g-4">
+        <!-- Reseña 1 -->
+        <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="100">
+          <div class="review-card-big">
+            <div class="review-header">
+              <img
+                src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50' viewBox='0 0 50 50'%3E%3Ccircle cx='25' cy='25' r='25' fill='%23D32F2F'/%3E%3Ctext x='15' y='32' fill='%23fff' font-size='20'%3EC%3C/text%3E%3C/svg%3E"
+                alt="Cliente">
+              <div>
+                <h5>Carlos Rodríguez</h5>
+                <div class="stars">★★★★★</div>
+              </div>
+            </div>
+            <p class="review-text">"Excelente atención, compré neumáticos para mi Silverado y llegaron al día
+              siguiente. 100% recomendable."</p>
+            <span class="review-date">Compra verificada - Hace 2 semanas</span>
+          </div>
+        </div>
+
+        <!-- Reseña 2 -->
+        <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="200">
+          <div class="review-card-big">
+            <div class="review-header">
+              <img
+                src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50' viewBox='0 0 50 50'%3E%3Ccircle cx='25' cy='25' r='25' fill='%23D32F2F'/%3E%3Ctext x='15' y='32' fill='%23fff' font-size='20'%3EM%3C/text%3E%3C/svg%3E"
+                alt="Cliente">
+              <div>
+                <h5>María González</h5>
+                <div class="stars">★★★★★</div>
+              </div>
+            </div>
+            <p class="review-text">"Las plumillas Wurth son excelentes, y el precio mucho mejor que en otras
+              tiendas. Volveré a comprar."</p>
+            <span class="review-date">Compra verificada - Hace 1 semana</span>
+          </div>
+        </div>
+
+        <!-- Reseña 3 -->
+        <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="300">
+          <div class="review-card-big">
+            <div class="review-header">
+              <img
+                src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50' viewBox='0 0 50 50'%3E%3Ccircle cx='25' cy='25' r='25' fill='%23D32F2F'/%3E%3Ctext x='15' y='32' fill='%23fff' font-size='20'%3EJ%3C/text%3E%3C/svg%3E"
+                alt="Cliente">
+              <div>
+                <h5>Juan Pérez</h5>
+                <div class="stars">★★★★☆</div>
+              </div>
+            </div>
+            <p class="review-text">"Buena variedad de aceites, encontré justo el Motul que necesitaba para mi auto.
+              Recomendado."</p>
+            <span class="review-date">Compra verificada - Hace 3 días</span>
+          </div>
+        </div>
+
+        <!-- Reseña 4 -->
+        <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="400">
+          <div class="review-card-big">
+            <div class="review-header">
+              <img
+                src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50' viewBox='0 0 50 50'%3E%3Ccircle cx='25' cy='25' r='25' fill='%23D32F2F'/%3E%3Ctext x='15' y='32' fill='%23fff' font-size='20'%3EP%3C/text%3E%3C/svg%3E"
+                alt="Cliente">
+              <div>
+                <h5>Patricia Soto</h5>
+                <div class="stars">★★★★★</div>
+              </div>
+            </div>
+            <p class="review-text">"Responden rápido por WhatsApp y me ayudaron a elegir la ampolleta LED correcta.
+              Muy buena atención."</p>
+            <span class="review-date">Compra verificada - Hace 5 días</span>
           </div>
         </div>
       </div>
@@ -473,7 +473,7 @@
         <p>Recibe las mejores ofertas y novedades directamente en tu correo</p>
         <div class="newsletter-form">
           <input type="email" placeholder="Tu correo electrónico">
-          <button class="btn-newsletter">Suscribirme</button>
+          <button class="btn-newsletter" type="button" onclick="alert('¡Gracias por suscribirte a nuestras ofertas!')">Suscribirme</button>
         </div>
       </div>
     </div>
@@ -485,7 +485,8 @@
       <div class="row">
         <div class="col-lg-4 mb-4">
           <div class="footer-logo">Alcrisol Accesorios</div>
-          <p>Tu tienda de confianza para accesorios y repuestos automotrices. Calidad garantizada y envíos a todo Chile.</p>
+          <p>Tu tienda de confianza para accesorios y repuestos automotrices. Calidad garantizada y envíos a todo Chile.
+          </p>
           <div class="social-icons">
             <a href="#"><i class="bi bi-facebook"></i></a>
             <a href="#"><i class="bi bi-instagram"></i></a>
@@ -550,7 +551,8 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
       <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
         <div class="modal-header border-0 bg-dark text-white p-3">
-          <h5 class="modal-title fw-bold" id="qv-title"><i class="bi bi-box-seam me-2 text-danger"></i> Detalle del Producto</h5>
+          <h5 class="modal-title fw-bold" id="qv-title"><i class="bi bi-box-seam me-2 text-danger"></i> Detalle del
+            Producto</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body p-4" id="qv-content">

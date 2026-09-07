@@ -66,3 +66,21 @@ CREATE TABLE IF NOT EXISTS detalle_pedido (
     precio_historico NUMERIC(10, 2) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- ============================================================
+-- SEGURIDAD (Punto 4: Row Level Security)
+-- ============================================================
+
+ALTER TABLE productos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE pedidos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE direccion_envio ENABLE ROW LEVEL SECURITY;
+ALTER TABLE detalle_pedido ENABLE ROW LEVEL SECURITY;
+
+-- Políticas de lectura para productos (público)
+CREATE POLICY "Public read access for productos" ON productos FOR SELECT USING (true);
+-- Políticas de lectura/escritura para administradores en productos
+CREATE POLICY "Admin write access for productos" ON productos FOR ALL USING (current_user = 'admin_user');
+
+-- Pedidos (solo inserciones públicas, lectura solo admin)
+CREATE POLICY "Public insert access for pedidos" ON pedidos FOR INSERT WITH CHECK (true);
+CREATE POLICY "Admin full access for pedidos" ON pedidos FOR ALL USING (current_user = 'admin_user');
