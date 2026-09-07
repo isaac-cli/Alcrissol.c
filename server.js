@@ -24,7 +24,9 @@ app.use(cors());
 // ============================================================
 // SEGURIDAD (20 PUNTOS)
 // ============================================================
-app.use(helmet()); // Punto 18: Cabeceras de seguridad
+app.use(helmet({
+    contentSecurityPolicy: false // Desactivado para no bloquear CDNs externos (Bootstrap, AOS)
+})); // Punto 18: Cabeceras de seguridad
 // Forzar HTTPS en producción si estamos detrás de un proxy (Render/Vercel)
 app.use((req, res, next) => {
     if (process.env.NODE_ENV === 'production' && req.headers['x-forwarded-proto'] !== 'https') {
