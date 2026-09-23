@@ -14,6 +14,7 @@ const crypto = require('crypto');
 
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const { Pool } = require('pg');
 const chilexpress = require('./chilexpress');
 const { buscarCalle, obtenerCertificadoOT, obtenerRegiones, obtenerComunas } = chilexpress;
@@ -133,7 +134,10 @@ function encrypt(text) {
 // Métodos de pago permitidos actualmente
 const METODOS_PAGO_ACTIVOS = ['transferencia'];
 
-app.use(express.static(__dirname));
+// ============================================================
+// SERVIR ARCHIVOS ESTÁTICOS
+// ============================================================
+app.use(express.static(path.join(__dirname, '../public')));
 
 // ============================================================
 // DATOS DE ORIGEN (tu tienda) — se usan para generar cada envío
