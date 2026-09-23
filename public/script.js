@@ -8,7 +8,7 @@ AOS.init({
 // ========== ESTADO GLOBAL Y CONFIGURACIÓN ==========
 const API_URL = window.API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://localhost:3000'
-    : 'https://carcenter-api.onrender.com');
+    : 'https://api.accsalcrison.cl');
 const VALID_CATEGORIES = new Set(['neumaticos','iluminacion','plumillas','refrigerantes','lubricantes','limpieza']);
 const LOCAL_JSON_PATH = 'productos-update.json';
 
