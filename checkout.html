@@ -296,66 +296,113 @@
                             <i class="bi bi-credit-card text-danger me-2"></i> Método de pago
                         </h5>
 
-                        <!-- Opción 1: Webpay -->
-                        <label class="pay-option" id="opt-webpay" onclick="seleccionarPago('webpay')">
-                            <input type="radio" name="pago" value="webpay" checked>
-                            <img src="https://www.webpay.cl/o/transbank-landing/img/logo-webpay-plus.png"
-                                onerror="this.style.display='none'" alt="Webpay">
-                            <div>
-                                <div class="pay-label">
-                                    Webpay Plus
-                                    <span class="webpay-badge ms-2"><i class="bi bi-shield-lock-fill"></i>
-                                        Transbank</span>
-                                </div>
-                                <div class="pay-sub">Tarjetas de crédito y débito · Todas las marcas</div>
-                            </div>
-                        </label>
-
-                        <!-- Opción 2: Transferencia -->
-                        <label class="pay-option" id="opt-transferencia" onclick="seleccionarPago('transferencia')">
-                            <input type="radio" name="pago" value="transferencia">
+                        <!-- Opción 1: Transferencia Bancaria (ACTIVO) -->
+                        <label class="pay-option selected" id="opt-transferencia" onclick="seleccionarPago('transferencia')">
+                            <input type="radio" name="pago" value="transferencia" checked>
                             <i class="bi bi-bank2 fs-4 text-primary"></i>
                             <div>
-                                <div class="pay-label">Transferencia bancaria</div>
-                                <div class="pay-sub">Banco Estado / BCI / Santander — confirmar en 24 hrs</div>
+                                <div class="pay-label">
+                                    Transferencia bancaria
+                                    <span class="webpay-badge ms-2" style="background:#28a745; color:white;"><i class="bi bi-check-circle-fill"></i> Activo</span>
+                                </div>
+                                <div class="pay-sub">Transferencia a cuenta Mercado Pago · Se confirma en 24 hrs</div>
                             </div>
                         </label>
 
-                        <!-- Opción 3: Efectivo -->
-                        <label class="pay-option" id="opt-efectivo" onclick="seleccionarPago('efectivo')">
-                            <input type="radio" name="pago" value="efectivo">
+                        <!-- Opción 2: Mercado Pago API (DESHABILITADO) -->
+                        <label class="pay-option" id="opt-mercadopago" style="opacity:0.5; cursor:not-allowed; pointer-events:none;">
+                            <input type="radio" name="pago" value="mercadopago" disabled>
+                            <img src="https://http2.mlstatic.com/frontend-assets/ui-navigation/5.19.5/mercadopago/logo__small@2x.png"
+                                onerror="this.style.display='none'" alt="Mercado Pago" style="height: 24px;">
+                            <div>
+                                <div class="pay-label">
+                                    Mercado Pago
+                                    <span class="webpay-badge ms-2" style="background:#6c757d; color:white;"><i class="bi bi-clock-fill"></i> Próximamente</span>
+                                </div>
+                                <div class="pay-sub">Tarjetas, efectivo y dinero en cuenta — próximamente disponible</div>
+                            </div>
+                        </label>
+
+                        <!-- Opción 3: Efectivo (DESHABILITADO) -->
+                        <label class="pay-option" id="opt-efectivo" style="opacity:0.5; cursor:not-allowed; pointer-events:none;">
+                            <input type="radio" name="pago" value="efectivo" disabled>
                             <i class="bi bi-cash-stack fs-4 text-success"></i>
                             <div>
-                                <div class="pay-label">Pago en efectivo al retirar</div>
-                                <div class="pay-sub">Solo retiro en tienda · Santiago</div>
+                                <div class="pay-label">
+                                    Pago en efectivo al retirar
+                                    <span class="webpay-badge ms-2" style="background:#6c757d; color:white;"><i class="bi bi-clock-fill"></i> Próximamente</span>
+                                </div>
+                                <div class="pay-sub">Solo retiro en tienda · Santiago — próximamente disponible</div>
                             </div>
                         </label>
 
-                        <!-- Info contextual -->
-                        <div id="info-webpay" class="tbk-info mb-3">
-                            <i class="bi bi-info-circle-fill text-primary me-1"></i>
-                            Serás redirigido al portal seguro de <strong>Transbank</strong> para completar el pago.
-                            Acepta tarjetas Visa, Mastercard, American Express y RedCompra.
+                        <!-- Info contextual: Transferencia (siempre visible) -->
+                        <div id="info-transferencia" class="tbk-info mb-3"
+                            style="background:#f0f4ff; border-left:4px solid #1a56db;">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="bi bi-bank2 me-2 fs-5" style="color:#1a56db;"></i>
+                                <strong style="color:#1a56db;">Datos para transferencia</strong>
+                            </div>
+                            <div class="row g-2" style="font-size:14px;">
+                                <div class="col-sm-6">
+                                    <div class="bg-white p-2 rounded border">
+                                        <div class="text-muted" style="font-size:11px;">Titular</div>
+                                        <strong>ALCSE SPA</strong>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="bg-white p-2 rounded border">
+                                        <div class="text-muted" style="font-size:11px;">RUT</div>
+                                        <strong>78.254.962-6</strong>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="bg-white p-2 rounded border">
+                                        <div class="text-muted" style="font-size:11px;">N° Cuenta</div>
+                                        <strong>1070657404</strong>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="bg-white p-2 rounded border">
+                                        <div class="text-muted" style="font-size:11px;">Tipo / Banco</div>
+                                        <strong>Cuenta Vista · Mercado Pago</strong>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="bg-white p-2 rounded border">
+                                        <div class="text-muted" style="font-size:11px;">Email de notificación</div>
+                                        <strong>Alcrison@gmail.com</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-2 p-2 bg-warning-subtle rounded" style="font-size:12px;">
+                                <i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>
+                                <strong>Importante:</strong> En el asunto de la transferencia coloca tu <strong>número de orden</strong> (ej: ORD-123).
+                                Luego envía el comprobante por WhatsApp o email.
+                            </div>
+                            <div class="mt-2 d-flex gap-2 flex-wrap">
+                                <a href="https://wa.me/56977137165?text=Hola%2C%20acabo%20de%20realizar%20una%20transferencia%20para%20mi%20pedido." 
+                                   class="btn btn-sm btn-success rounded-pill" target="_blank">
+                                    <i class="bi bi-whatsapp me-1"></i> Enviar comprobante por WhatsApp
+                                </a>
+                                <a href="mailto:Alcrison@gmail.com?subject=Comprobante de transferencia" 
+                                   class="btn btn-sm btn-outline-primary rounded-pill">
+                                    <i class="bi bi-envelope me-1"></i> Enviar por email
+                                </a>
+                            </div>
                             <div class="secure-row mt-2">
                                 <span class="secure-chip"><i class="bi bi-lock-fill"></i> SSL 256-bit</span>
-                                <span class="secure-chip"><i class="bi bi-shield-check-fill"></i> 3D Secure</span>
-                                <span class="secure-chip"><i class="bi bi-award-fill"></i> PCI DSS</span>
+                                <span class="secure-chip"><i class="bi bi-shield-check-fill"></i> Datos cifrados</span>
                             </div>
                         </div>
-                        <div id="info-transferencia" class="tbk-info mb-3"
-                            style="display:none; background:#f0f4ff; border-color:#1a56db;">
-                            <i class="bi bi-info-circle-fill me-1" style="color:#1a56db;"></i>
-                            Datos de transferencia:<br>
-                            <strong>Banco:</strong> Banco Estado &nbsp;|&nbsp;
-                            <strong>Cuenta Cte:</strong> 000-000000-00 &nbsp;|&nbsp;
-                            <strong>RUT:</strong> 76.XXX.XXX-X<br>
-                            Envía el comprobante a <strong>pagos@alcrisol.cl</strong>
+                        <div id="info-mercadopago" class="tbk-info mb-3" style="display:none; background:#e5f5fc; border-left:4px solid #009ee3;">
+                            <i class="bi bi-info-circle-fill me-1" style="color:#009ee3;"></i>
+                            Mercado Pago estará disponible próximamente.
                         </div>
                         <div id="info-efectivo" class="tbk-info mb-3"
                             style="display:none; background:#f0fff4; border-color:#28a745;">
                             <i class="bi bi-geo-alt-fill me-1" style="color:#28a745;"></i>
-                            Retira en: <strong>Av. Principal 123, Santiago</strong><br>
-                            Horario: Lun-Vie 9:00 – 18:30 · Sáb 9:00 – 13:00
+                            Retiro en tienda estará disponible próximamente.
                         </div>
 
                         <!-- Términos -->
@@ -370,13 +417,8 @@
                         <!-- BOTÓN PAGAR -->
                         <button class="btn btn-danger w-100 py-3 fw-bold fs-5" id="btn-pagar" onclick="iniciarPago()">
                             <i class="bi bi-lock-fill me-2"></i>
-                            <span id="btn-pagar-text">Pagar con Webpay</span>
+                            <span id="btn-pagar-text">Confirmar pedido y transferir</span>
                         </button>
-
-                        <!-- Formulario oculto para Transbank (se envía programáticamente) -->
-                        <form id="tbk-form" action="" method="POST" style="display:none;">
-                            <input type="hidden" name="token_ws" id="tbk-token">
-                        </form>
 
                         <p class="text-center text-muted mt-3" style="font-size:12px;">
                             <i class="bi bi-lock-fill"></i> Tus datos están protegidos con encriptación SSL
@@ -406,9 +448,71 @@
             ? 'http://localhost:3000'
             : 'https://carcenter-api.onrender.com');
 
-        let pagoSeleccionado = 'webpay';
+        let pagoSeleccionado = 'transferencia';
         let carritoLocal = [];
         let totalCompra = 0;
+        let pedidoEnProceso = false;
+
+        // ==========================================================
+        // UTILIDADES DE SEGURIDAD
+        // ==========================================================
+        function escapeHtml(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = String(str);
+            return div.innerHTML;
+        }
+
+        function formatCLP(num) {
+            return '$' + Number(num).toLocaleString('es-CL');
+        }
+
+        // ==========================================================
+        // VALIDACIÓN DE RUT CHILENO
+        // ==========================================================
+        function validarRut(rut) {
+            if (!rut || rut.length < 3) return false;
+            const clean = rut.replace(/[.\-]/g, '').toUpperCase();
+            const body = clean.slice(0, -1);
+            const dv = clean.slice(-1);
+            if (!/^\d+$/.test(body)) return false;
+            let sum = 0, mul = 2;
+            for (let i = body.length - 1; i >= 0; i--) {
+                sum += parseInt(body[i]) * mul;
+                mul = mul === 7 ? 2 : mul + 1;
+            }
+            const expected = 11 - (sum % 11);
+            const dvExpected = expected === 11 ? '0' : expected === 10 ? 'K' : String(expected);
+            return dv === dvExpected;
+        }
+
+        function formatearRut(input) {
+            let val = input.value.replace(/[^0-9kK]/g, '').toUpperCase();
+            if (val.length > 1) {
+                const body = val.slice(0, -1);
+                const dv = val.slice(-1);
+                const formatted = body.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                input.value = formatted + '-' + dv;
+            }
+        }
+
+        // ==========================================================
+        // FORMATO DE TELÉFONO
+        // ==========================================================
+        function formatearTelefono(input) {
+            let val = input.value.replace(/[^0-9+]/g, '');
+            if (val.startsWith('9') && !val.startsWith('+')) {
+                val = '+56 ' + val;
+            } else if (val.startsWith('56') && !val.startsWith('+')) {
+                val = '+' + val;
+            }
+            if (val.startsWith('+56') && val.length > 4) {
+                const nums = val.replace('+56', '').replace(/\s/g, '');
+                val = '+56 ' + nums.substring(0, 1) + ' ' + nums.substring(1, 5) + ' ' + nums.substring(5, 9);
+                val = val.trim();
+            }
+            input.value = val;
+        }
 
         // ==========================================================
         // INICIALIZACIÓN
@@ -417,20 +521,39 @@
             cargarCarrito();
             inicializarRegiones();
 
-            // Si Transbank rechazó/canceló y volvió
+            // Formato de RUT en tiempo real
+            const rutInput = document.getElementById('buyer-rut');
+            if (rutInput) {
+                rutInput.addEventListener('input', () => formatearRut(rutInput));
+            }
+
+            // Formato de teléfono en tiempo real
+            const phoneInput = document.getElementById('buyer-phone');
+            if (phoneInput) {
+                phoneInput.addEventListener('input', () => formatearTelefono(phoneInput));
+            }
+
+            // Si Mercado Pago rechazó/canceló y volvió
             const params = new URLSearchParams(window.location.search);
-            if (params.get('pago') === 'rechazado') mostrarAlerta('danger', 'Tu pago fue rechazado por Transbank. Intenta con otro método o tarjeta.');
-            if (params.get('pago') === 'cancelado') mostrarAlerta('warning', 'Cancelaste el pago. Tu pedido sigue guardado.');
-            if (params.get('pago') === 'error') mostrarAlerta('danger', 'Ocurrió un error con Transbank. Intenta nuevamente.');
+            if (params.get('pago') === 'rechazado') mostrarAlerta('danger', 'Tu pago fue rechazado. Intenta con otro método o tarjeta.');
+            if (params.get('pago') === 'pendiente') mostrarAlerta('warning', 'Tu pago está pendiente de aprobación.');
+            if (params.get('pago') === 'error') mostrarAlerta('danger', 'Ocurrió un error con el pago. Intenta nuevamente.');
+
+            // Inicializar opción seleccionada
+            seleccionarPago('transferencia');
         });
 
         // ==========================================================
-        // CARGAR CARRITO desde localStorage
+        // CARGAR CARRITO desde localStorage (con sanitización)
         // ==========================================================
         function cargarCarrito() {
-            carritoLocal = JSON.parse(localStorage.getItem('cart') || '[]');
+            try {
+                carritoLocal = JSON.parse(localStorage.getItem('cart') || '[]');
+            } catch (e) {
+                carritoLocal = [];
+            }
 
-            if (carritoLocal.length === 0) {
+            if (!Array.isArray(carritoLocal) || carritoLocal.length === 0) {
                 alert('Tu carrito está vacío');
                 window.location.href = 'index.html';
                 return;
@@ -441,39 +564,45 @@
             let subtotal = 0;
 
             carritoLocal.forEach(item => {
-                const linea = item.price * item.quantity;
+                const price = Number(item.price) || 0;
+                const qty = Number(item.quantity) || 1;
+                const linea = price * qty;
                 subtotal += linea;
+                // Escapar HTML para prevenir XSS desde localStorage
+                const safeName = escapeHtml(item.name);
                 html += `
             <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
                 <div>
-                    <div class="fw-bold" style="font-size:14px;">${item.name}</div>
-                    <small class="text-muted">${item.quantity} × $${item.price.toLocaleString('es-CL')}</small>
+                    <div class="fw-bold" style="font-size:14px;">${safeName}</div>
+                    <small class="text-muted">${qty} × ${formatCLP(price)}</small>
                 </div>
-                <span class="fw-bold text-danger">$${linea.toLocaleString('es-CL')}</span>
+                <span class="fw-bold text-danger">${formatCLP(linea)}</span>
             </div>`;
             });
 
             totalCompra = subtotal;
             container.innerHTML = html;
-            document.getElementById('checkout-subtotal').textContent = `$${subtotal.toLocaleString('es-CL')}`;
-            document.getElementById('checkout-total').textContent = `$${subtotal.toLocaleString('es-CL')}`;
+            document.getElementById('checkout-subtotal').textContent = formatCLP(subtotal);
+            document.getElementById('checkout-total').textContent = formatCLP(subtotal);
         }
 
         // ==========================================================
-        // SELECCIONAR MÉTODO DE PAGO
+        // SELECCIONAR MÉTODO DE PAGO (solo transferencia activo)
         // ==========================================================
         function seleccionarPago(metodo) {
-            pagoSeleccionado = metodo;
+            // Solo transferencia está activa
+            if (metodo !== 'transferencia') return;
+            pagoSeleccionado = 'transferencia';
 
             // Resaltar opción
-            ['webpay', 'transferencia', 'efectivo'].forEach(m => {
-                document.getElementById(`opt-${m}`)?.classList.toggle('selected', m === metodo);
-                document.getElementById(`info-${m}`) && (document.getElementById(`info-${m}`).style.display = m === metodo ? 'block' : 'none');
+            ['mercadopago', 'transferencia', 'efectivo'].forEach(m => {
+                document.getElementById(`opt-${m}`)?.classList.toggle('selected', m === 'transferencia');
+                const info = document.getElementById(`info-${m}`);
+                if (info) info.style.display = m === 'transferencia' ? 'block' : 'none';
             });
 
             // Actualizar botón
-            const labels = { webpay: 'Pagar con Webpay', transferencia: 'Confirmar pedido', efectivo: 'Reservar pedido' };
-            document.getElementById('btn-pagar-text').textContent = labels[metodo];
+            document.getElementById('btn-pagar-text').textContent = 'Confirmar pedido y transferir';
         }
 
         // ==========================================================
@@ -636,8 +765,8 @@
                         
                         if (exito) {
                             const desc = [rawComuna, rawRegion].filter(Boolean).join(', ');
-                            if (status) status.innerHTML = `<span class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i> Ubicación detectada: ${desc}</span>`;
-                            mostrarAlerta('success', `📍 Ubicación detectada: ${desc}`);
+                            if (status) status.innerHTML = `<span class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i> Ubicación detectada: ${escapeHtml(desc)}</span>`;
+                            mostrarAlerta('success', `📍 Ubicación detectada: ${escapeHtml(desc)}`);
                         } else {
                             if (status) status.innerHTML = '<span class="text-warning fw-bold"><i class="bi bi-info-circle-fill me-1"></i> Ubicación GPS obtenida. Selecciona tu comuna en los desplegables.</span>';
                             mostrarAlerta('info', 'Ubicación obtenida. Por favor confirma tu región y comuna en el formulario.');
@@ -732,16 +861,18 @@
         function validar() {
             const nombre = document.getElementById('buyer-name').value.trim();
             const email = document.getElementById('buyer-email').value.trim();
+            const rut = document.getElementById('buyer-rut').value.trim();
             const calle = document.getElementById('dir-calle').value.trim();
             const comuna = document.getElementById('dir-comuna').value;
             const region = document.getElementById('dir-region').value;
             const terms = document.getElementById('terms').checked;
 
-            if (!nombre) { mostrarAlerta('danger', 'Ingresa tu nombre completo'); return false; }
-            if (!email.includes('@')) { mostrarAlerta('danger', 'Ingresa un email válido'); return false; }
-            if (!calle) { mostrarAlerta('danger', 'Ingresa tu dirección'); return false; }
-            if (!comuna) { mostrarAlerta('danger', 'Selecciona tu comuna'); return false; }
+            if (!nombre || nombre.length < 3) { mostrarAlerta('danger', 'Ingresa tu nombre completo (mínimo 3 caracteres)'); return false; }
+            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { mostrarAlerta('danger', 'Ingresa un email válido'); return false; }
+            if (rut && !validarRut(rut)) { mostrarAlerta('danger', 'El RUT ingresado no es válido'); return false; }
+            if (!calle || calle.length < 5) { mostrarAlerta('danger', 'Ingresa tu dirección completa (calle y número)'); return false; }
             if (!region) { mostrarAlerta('danger', 'Selecciona tu región'); return false; }
+            if (!comuna) { mostrarAlerta('danger', 'Selecciona tu comuna'); return false; }
             if (!terms) { mostrarAlerta('danger', 'Debes aceptar los términos y condiciones'); return false; }
             return true;
         }
@@ -758,7 +889,7 @@
                 email: document.getElementById('buyer-email').value.trim(),
                 telefono: document.getElementById('buyer-phone').value.trim(),
                 nit: document.getElementById('buyer-rut').value.trim(),
-                metodo_pago: pagoSeleccionado,
+                metodo_pago: 'transferencia',
                 total: totalCompra,
                 items: carritoLocal,
                 direccion: {
@@ -777,15 +908,29 @@
                 body: JSON.stringify(body)
             });
 
-            if (!resp.ok) throw new Error('No se pudo crear el pedido');
+            if (!resp.ok) {
+                const errorData = await resp.json().catch(() => ({}));
+                throw new Error(errorData.error || 'No se pudo crear el pedido');
+            }
             return await resp.json(); // { pedido_id, orden }
         }
 
         // ==========================================================
-        // INICIAR PAGO (botón principal)
+        // INICIAR PAGO (botón principal) — con protección anti doble-clic
         // ==========================================================
         async function iniciarPago() {
+            if (pedidoEnProceso) return;
             if (!validar()) return;
+
+            // Confirmación antes de proceder
+            const totalFormateado = formatCLP(totalCompra);
+            if (!confirm(`¿Confirmas tu pedido por ${totalFormateado}?\n\nDespués de confirmar, realiza la transferencia a la cuenta de Mercado Pago de ALCSE SPA.`)) {
+                return;
+            }
+
+            pedidoEnProceso = true;
+            const btnPagar = document.getElementById('btn-pagar');
+            btnPagar.disabled = true;
 
             mostrarLoading('Creando tu pedido…');
 
@@ -793,38 +938,17 @@
                 // 1. Guardar pedido en la BD
                 const { pedido_id, orden } = await crearPedidoEnBD();
 
-                if (pagoSeleccionado === 'webpay') {
-                    // 2a. Webpay: pedir token a nuestra API
-                    actualizarLoadingText('Conectando con Transbank…');
-
-                    const tbkResp = await fetch(`${API_URL}/transbank/crear`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ pedido_id, monto: totalCompra })
-                    });
-
-                    if (!tbkResp.ok) throw new Error('Error al crear transacción Transbank');
-                    const { url, token } = await tbkResp.json();
-
-                    // 3. Limpiar carrito y redirigir a Webpay
-                    localStorage.removeItem('cart');
-
-                    actualizarLoadingText('Redirigiendo a Webpay…');
-                    document.getElementById('tbk-form').action = url;
-                    document.getElementById('tbk-token').value = token;
-                    document.getElementById('tbk-form').submit();
-
-                } else {
-                    // 2b. Efectivo / Transferencia: solo guardar y confirmar
-                    localStorage.removeItem('cart');
-                    ocultarLoading();
-                    window.location.href = `gracias.html?orden=${orden}&total=${totalCompra}&tipo=${pagoSeleccionado}`;
-                }
+                // 2. Transferencia: guardar y redirigir a gracias
+                localStorage.removeItem('cart');
+                ocultarLoading();
+                window.location.href = `gracias.html?orden=${encodeURIComponent(orden)}&total=${totalCompra}&tipo=transferencia`;
 
             } catch (err) {
                 console.error(err);
                 ocultarLoading();
-                mostrarAlerta('danger', 'Ocurrió un error. Intenta nuevamente o contáctanos.');
+                pedidoEnProceso = false;
+                btnPagar.disabled = false;
+                mostrarAlerta('danger', err.message || 'Ocurrió un error. Intenta nuevamente o contáctanos.');
             }
         }
 
@@ -837,8 +961,8 @@
             if (codigo === 'CARCENTER10') {
                 const descuento = Math.round(totalCompra * 0.10);
                 totalCompra -= descuento;
-                document.getElementById('checkout-total').textContent = `$${totalCompra.toLocaleString('es-CL')}`;
-                msg.innerHTML = `<span class="text-success"><i class="bi bi-check-circle-fill"></i> ¡10% de descuento aplicado! -$${descuento.toLocaleString('es-CL')}</span>`;
+                document.getElementById('checkout-total').textContent = formatCLP(totalCompra);
+                msg.innerHTML = `<span class="text-success"><i class="bi bi-check-circle-fill"></i> ¡10% de descuento aplicado! -${formatCLP(descuento)}</span>`;
             } else {
                 msg.innerHTML = `<span class="text-danger"><i class="bi bi-x-circle-fill"></i> Código no válido</span>`;
             }
@@ -865,14 +989,13 @@
                 alerta.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:99999;min-width:320px;max-width:90vw;';
                 document.body.appendChild(alerta);
             }
-            alerta.innerHTML = `<div class="alert alert-${tipo} alert-dismissible shadow">
+            alerta.innerHTML = `<div class="alert alert-${escapeHtml(tipo)} alert-dismissible shadow">
         ${mensaje}
         <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
     </div>`;
+            // Auto-cerrar después de 6 segundos
+            setTimeout(() => { if (alerta.firstChild) alerta.firstChild.remove(); }, 6000);
         }
-
-        // Inicializar opción seleccionada
-        seleccionarPago('webpay');
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

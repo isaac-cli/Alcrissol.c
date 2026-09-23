@@ -1,14 +1,14 @@
 // ============================================================
 // CAR CENTER - API SERVER
 // Base de datos: Neon PostgreSQL
-// Pagos: Transbank Webpay Plus (SDK oficial)
+// Pagos: Transferencia bancaria (único método activo)
 // ============================================================
 
 require('dotenv').config();
 
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-const { body, validationResult } = require('express-validator');
+const { body, param, validationResult } = require('express-validator');
 const xss = require('xss-clean');
 const crypto = require('crypto');
 
@@ -19,25 +19,68 @@ const chilexpress = require('./chilexpress');
 const { buscarCalle, obtenerCertificadoOT, obtenerRegiones, obtenerComunas } = chilexpress;
 
 const app = express();
-app.use(cors());
 
 // ============================================================
-// SEGURIDAD (20 PUNTOS)
+// ENTORNO
 // ============================================================
+const esProduccion = process.env.NODE_ENV === 'production';
+
+// ============================================================
+// SEGURIDAD
+// ============================================================
+
+// CORS: lista blanca de orígenes permitidos
+const originesPermitidos = [
+    'https://accsalcrison.cl',
+    'https://www.accsalcrison.cl',
+    'https://api.accsalcrison.cl',
+    'https://alcrissol-c.onrender.com'
+];
+if (!esProduccion) {
+    originesPermitidos.push('http://localhost:3000', 'http://localhost:5500', 'http://127.0.0.1:3000', 'http://127.0.0.1:5500');
+}
+app.use(cors({
+    origin: function (origin, callback) {
+        // Permitir requests sin origin (apps móviles, curl, etc)
+        if (!origin) return callback(null, true);
+        if (originesPermitidos.indexOf(origin) !== -1) {
+            return callback(null, true);
+        }
+        return callback(new Error('Origen no permitido por CORS'));
+    },
+    credentials: true
+}));
+
+// Cabeceras de seguridad con CSP habilitado
 app.use(helmet({
-    contentSecurityPolicy: false // Desactivado para no bloquear CDNs externos (Bootstrap, AOS)
-})); // Punto 18: Cabeceras de seguridad
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://unpkg.com"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://fonts.googleapis.com"],
+            fontSrc: ["'self'", "https://cdn.jsdelivr.net", "https://fonts.gstatic.com"],
+            imgSrc: ["'self'", "data:", "https:", "blob:"],
+            connectSrc: ["'self'", "https://nominatim.openstreetmap.org", ...originesPermitidos],
+            frameSrc: ["'none'"],
+            objectSrc: ["'none'"],
+            baseUri: ["'self'"]
+        }
+    },
+    crossOriginEmbedderPolicy: false // Para cargar imágenes externas
+}));
+
 // Forzar HTTPS en producción si estamos detrás de un proxy (Render/Vercel)
 app.use((req, res, next) => {
-    if (process.env.NODE_ENV === 'production' && req.headers['x-forwarded-proto'] !== 'https') {
+    if (esProduccion && req.headers['x-forwarded-proto'] !== 'https') {
         return res.redirect('https://' + req.headers.host + req.url);
     }
     next();
 });
-app.use(xss()); // Punto 15: Escapa contenido del usuario
-app.use(express.json({ limit: '10kb' })); // Punto 16: Restringe tamaño de body
 
-// Punto 11 y 12: Rate limit
+app.use(xss()); // Escapa contenido del usuario
+app.use(express.json({ limit: '10kb' })); // Restringe tamaño de body
+
+// Rate limit general
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 150,
@@ -45,29 +88,50 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// Punto 6: Fuerza autenticación para administradores
+// Rate limit más estricto para pedidos (anti-abuso)
+const pedidosLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    message: { error: 'Demasiados pedidos. Intente más tarde.' }
+});
+
+// Autenticación para administradores — sin fallback inseguro
+if (!process.env.ADMIN_API_KEY) {
+    console.warn('⚠️  [SEGURIDAD] ADMIN_API_KEY no está definida en .env. Las rutas admin no serán accesibles.');
+}
 const authMiddleware = (req, res, next) => {
     const token = req.headers['x-api-key'];
-    if (token && token === (process.env.ADMIN_API_KEY || 'secreto-admin-123')) {
+    if (!process.env.ADMIN_API_KEY) {
+        return res.status(503).json({ error: 'Servicio de administración no configurado' });
+    }
+    if (token && token === process.env.ADMIN_API_KEY) {
         next();
     } else {
         res.status(401).json({ error: 'No autorizado' });
     }
 };
 
-// Punto 5 y 10: Funciones de cifrado
+// Funciones de cifrado — requiere clave en variables de entorno
+if (!process.env.ENCRYPTION_KEY) {
+    console.warn('⚠️  [SEGURIDAD] ENCRYPTION_KEY no está definida en .env. Se usará clave aleatoria temporal.');
+}
 const ALGORITHM = 'aes-256-cbc';
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY ? process.env.ENCRYPTION_KEY.padEnd(32, '0').substring(0,32) : '12345678901234567890123456789012';
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY
+    ? process.env.ENCRYPTION_KEY.padEnd(32, '0').substring(0, 32)
+    : crypto.randomBytes(32).toString('hex').substring(0, 32);
 const IV_LENGTH = 16;
 
 function encrypt(text) {
-    if(!text) return text;
+    if (!text) return text;
     let iv = crypto.randomBytes(IV_LENGTH);
     let cipher = crypto.createCipheriv(ALGORITHM, Buffer.from(ENCRYPTION_KEY), iv);
     let encrypted = cipher.update(text);
     encrypted = Buffer.concat([encrypted, cipher.final()]);
     return iv.toString('hex') + ':' + encrypted.toString('hex');
 }
+
+// Métodos de pago permitidos actualmente
+const METODOS_PAGO_ACTIVOS = ['transferencia'];
 
 app.use(express.static(__dirname));
 
@@ -99,7 +163,7 @@ if (!process.env.DATABASE_URL) {
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false },
-    statement_timeout: 5000 // Punto 13: Monitoriza consultas DB
+    statement_timeout: 5000 // Monitoriza consultas DB
 });
 
 pool.on('error', (err) => {
@@ -107,22 +171,21 @@ pool.on('error', (err) => {
 });
 
 // ============================================================
-// TRANSBANK WEBPAY PLUS
+// MERCADO PAGO (DESHABILITADO TEMPORALMENTE)
+// Se activará cuando las credenciales estén configuradas.
 // ============================================================
-// npm install transbank-sdk
-const { WebpayPlus, Options, IntegrationApiKeys, Environment, IntegrationCommerceCodes } = require('transbank-sdk');
-
-// AMBIENTE: se controla con la variable de entorno TBK_ENV=production
-// Mientras no la definas, corre en modo Integración (pruebas) con las
-// tarjetas y comercio de prueba oficiales de Transbank.
-const esProduccion = process.env.TBK_ENV === 'production';
-const tbkOptions = new Options(
-    esProduccion ? process.env.TBK_COMMERCE_CODE : IntegrationCommerceCodes.WEBPAY_PLUS,
-    esProduccion ? process.env.TBK_API_KEY : IntegrationApiKeys.WEBPAY,
-    esProduccion ? Environment.Production : Environment.Integration
-);
-
-const tx = new WebpayPlus.Transaction(tbkOptions);
+let mpClient = null;
+if (process.env.MP_ACCESS_TOKEN && process.env.MP_ACCESS_TOKEN !== 'TU_ACCESS_TOKEN_AQUI') {
+    try {
+        const { MercadoPagoConfig } = require('mercadopago');
+        mpClient = new MercadoPagoConfig({
+            accessToken: process.env.MP_ACCESS_TOKEN
+        });
+        console.log('💳 Mercado Pago configurado (deshabilitado hasta activación)');
+    } catch (e) {
+        console.warn('⚠️  Mercado Pago SDK no disponible:', e.message);
+    }
+}
 
 // ============================================================
 // RUTAS: PRODUCTOS
@@ -131,7 +194,7 @@ const tx = new WebpayPlus.Transaction(tbkOptions);
 // GET /productos - listar todos
 app.get('/productos', async (req, res) => {
     try {
-        const result = await pool.query('SELECT * FROM productos ORDER BY id LIMIT 100'); // Punto 17
+        const result = await pool.query('SELECT * FROM productos ORDER BY id LIMIT 100');
         res.json(result.rows);
     } catch (err) {
         console.error(err);
@@ -151,7 +214,7 @@ app.get('/productos/:id', async (req, res) => {
 });
 
 // POST /productos - crear producto (admin)
-app.post('/productos', authMiddleware, [ body('sku').escape(), body('nombre').escape() ], async (req, res) => {
+app.post('/productos', authMiddleware, [body('sku').escape(), body('nombre').escape()], async (req, res) => {
     const { sku, nombre, precio, stock, categoria, marca, imagen, descripcion } = req.body;
     try {
         const result = await pool.query(
@@ -184,18 +247,67 @@ app.put('/productos/:id', authMiddleware, async (req, res) => {
 // RUTAS: PEDIDOS
 // ============================================================
 
-// POST /pedidos - crear pedido
-app.post('/pedidos', async (req, res) => {
+// POST /pedidos - crear pedido (con validación completa)
+app.post('/pedidos', pedidosLimiter, [
+    body('nombre').trim().notEmpty().withMessage('Nombre es obligatorio').isLength({ max: 255 }),
+    body('email').trim().isEmail().withMessage('Email inválido').normalizeEmail(),
+    body('telefono').optional().trim().isLength({ max: 50 }),
+    body('nit').optional().trim().isLength({ max: 50 }),
+    body('metodo_pago').trim().notEmpty().withMessage('Método de pago requerido'),
+    body('total').isNumeric().withMessage('Total debe ser numérico'),
+    body('items').isArray({ min: 1 }).withMessage('Debe incluir al menos un producto'),
+    body('items.*.id').isInt({ min: 1 }).withMessage('ID de producto inválido'),
+    body('items.*.quantity').isInt({ min: 1, max: 100 }).withMessage('Cantidad inválida'),
+    body('items.*.price').isNumeric({ min: 1 }).withMessage('Precio inválido')
+], async (req, res) => {
+    // Validar errores de express-validator
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ error: 'Datos inválidos', detalles: errors.array() });
+    }
+
+    const { nombre, email, telefono, nit, metodo_pago, total, items, direccion } = req.body;
+
+    // Validar método de pago permitido
+    if (!METODOS_PAGO_ACTIVOS.includes(metodo_pago)) {
+        return res.status(400).json({
+            error: `Método de pago "${metodo_pago}" no disponible. Métodos activos: ${METODOS_PAGO_ACTIVOS.join(', ')}`
+        });
+    }
+
+    // Validar que el total sea positivo
+    if (Number(total) <= 0) {
+        return res.status(400).json({ error: 'El total debe ser mayor a 0' });
+    }
+
     const client = await pool.connect();
     try {
         await client.query('BEGIN');
 
-        const { nombre, email, telefono, nit, metodo_pago, total, items, direccion } = req.body;
         const encryptedEmail = encrypt(email);
         const encryptedTelefono = encrypt(telefono);
         const encryptedNit = encrypt(nit);
 
-        // 1. Crear el pedido
+        // 1. Verificar stock suficiente para TODOS los items antes de procesar
+        for (const item of items) {
+            const stockResult = await client.query(
+                'SELECT stock, nombre FROM productos WHERE id = $1',
+                [item.id]
+            );
+            if (stockResult.rows.length === 0) {
+                await client.query('ROLLBACK');
+                return res.status(400).json({ error: `Producto ID ${item.id} no encontrado` });
+            }
+            const productoActual = stockResult.rows[0];
+            if (productoActual.stock < item.quantity) {
+                await client.query('ROLLBACK');
+                return res.status(400).json({
+                    error: `Stock insuficiente para "${productoActual.nombre}". Disponible: ${productoActual.stock}, solicitado: ${item.quantity}`
+                });
+            }
+        }
+
+        // 2. Crear el pedido
         const pedidoResult = await client.query(
             `INSERT INTO pedidos (nombre, email, telefono, nit, metodo_pago, total, estado)
              VALUES ($1,$2,$3,$4,$5,$6,'pendiente') RETURNING *`,
@@ -203,12 +315,11 @@ app.post('/pedidos', async (req, res) => {
         );
         const pedido = pedidoResult.rows[0];
 
-        // 2. Insertar dirección de envío
+        // 3. Insertar dirección de envío
         if (direccion) {
-            // Separamos "Av. Ejemplo 1234" en nombre de calle + número,
-            // ya que Chilexpress los pide como campos independientes.
-            const match = direccion.calle.match(/^(.*?)(\d+)\s*$/);
-            const calleNombre = match ? match[1].trim() : direccion.calle;
+            const calleStr = String(direccion.calle || '');
+            const match = calleStr.match(/^(.*?)(\d+)\s*$/);
+            const calleNombre = match ? match[1].trim() : calleStr;
             const calleNumero = match ? match[2].trim() : 'S/N';
 
             await client.query(
@@ -218,16 +329,16 @@ app.post('/pedidos', async (req, res) => {
             );
         }
 
-        // 3. Insertar detalle del pedido y actualizar stock
+        // 4. Insertar detalle del pedido y actualizar stock
         for (const item of items) {
             await client.query(
                 `INSERT INTO detalle_pedido (pedido_id, producto_id, cantidad, precio_historico)
                  VALUES ($1,$2,$3,$4)`,
                 [pedido.id, item.id, item.quantity, item.price]
             );
-            // Bajar stock
+            // Bajar stock (ya validamos que hay suficiente)
             await client.query(
-                'UPDATE productos SET stock = stock - $1 WHERE id = $2',
+                'UPDATE productos SET stock = stock - $1 WHERE id = $2 AND stock >= $1',
                 [item.quantity, item.id]
             );
         }
@@ -244,8 +355,8 @@ app.post('/pedidos', async (req, res) => {
     }
 });
 
-// GET /pedidos/:id - ver un pedido
-app.get('/pedidos/:id', async (req, res) => {
+// GET /pedidos/:id - ver un pedido (ADMIN ONLY)
+app.get('/pedidos/:id', authMiddleware, async (req, res) => {
     try {
         const pedido = await pool.query('SELECT * FROM pedidos WHERE id = $1', [req.params.id]);
         const detalles = await pool.query(
@@ -267,12 +378,47 @@ app.get('/pedidos/:id', async (req, res) => {
     }
 });
 
-// PATCH /pedidos/:id/estado - actualizar estado
-app.patch('/pedidos/:id/estado', async (req, res) => {
+// GET /pedidos/:id/estado-publico — endpoint público (solo estado y tracking, sin datos privados)
+app.get('/pedidos/:id/estado-publico', [
+    param('id').isInt({ min: 1 })
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ error: 'ID de pedido inválido' });
+    }
     try {
+        const result = await pool.query(
+            'SELECT id, estado, metodo_pago, chilexpress_tracking, chilexpress_estado, created_at FROM pedidos WHERE id = $1',
+            [req.params.id]
+        );
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Pedido no encontrado' });
+        }
+        const pedido = result.rows[0];
+        res.json({
+            orden: `ORD-${pedido.id}`,
+            estado: pedido.estado,
+            metodo_pago: pedido.metodo_pago,
+            tracking: pedido.chilexpress_tracking || null,
+            envio_estado: pedido.chilexpress_estado || null,
+            fecha: pedido.created_at
+        });
+    } catch (err) {
+        res.status(500).json({ error: 'Error al consultar estado del pedido' });
+    }
+});
+
+// PATCH /pedidos/:id/estado - actualizar estado (ADMIN ONLY)
+app.patch('/pedidos/:id/estado', authMiddleware, async (req, res) => {
+    try {
+        const estadosValidos = ['pendiente', 'pagado', 'preparando', 'enviado', 'entregado', 'cancelado'];
+        const nuevoEstado = req.body.estado;
+        if (!estadosValidos.includes(nuevoEstado)) {
+            return res.status(400).json({ error: `Estado inválido. Válidos: ${estadosValidos.join(', ')}` });
+        }
         await pool.query(
             'UPDATE pedidos SET estado=$1 WHERE id=$2',
-            [req.body.estado, req.params.id]
+            [nuevoEstado, req.params.id]
         );
         res.json({ ok: true });
     } catch (err) {
@@ -281,100 +427,23 @@ app.patch('/pedidos/:id/estado', async (req, res) => {
 });
 
 // ============================================================
-// RUTAS: TRANSBANK WEBPAY PLUS
+// RUTAS: MERCADO PAGO (DESHABILITADAS TEMPORALMENTE)
+// Se activarán cuando las credenciales estén configuradas.
 // ============================================================
 
-// PASO 1: Iniciar transacción Webpay
-// El frontend llama esto para obtener la URL de pago de Transbank
-app.post('/transbank/crear', async (req, res) => {
-    const { pedido_id, monto } = req.body;
+const mpDeshabilitado = (req, res) => {
+    res.status(503).json({
+        error: 'Mercado Pago no está habilitado actualmente. Use transferencia bancaria.',
+        metodo_activo: 'transferencia'
+    });
+};
 
-    // URLs donde Transbank redirigirá al usuario después del pago
-    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
-    const returnUrl = `${baseUrl}/transbank/retorno`;
-
-    try {
-        const response = await tx.create(
-            `ORD-${pedido_id}`,   // buyOrder: identificador único del pedido
-            `SES-${Date.now()}`,  // sessionId: ID de sesión
-            monto,                // amount: monto en pesos CLP
-            returnUrl             // returnUrl: donde Transbank devuelve al comprador
-        );
-
-        // Guardar el token en la BD para verificarlo después
-        await pool.query(
-            'UPDATE pedidos SET transbank_token=$1 WHERE id=$2',
-            [response.token, pedido_id]
-        );
-
-        res.json({
-            url: response.url,    // URL del formulario de pago de Transbank
-            token: response.token // Token que hay que enviar como campo POST a esa URL
-        });
-    } catch (err) {
-        console.error('Transbank crear:', err);
-        res.status(500).json({ error: 'Error al crear transacción Transbank' });
-    }
+app.post('/mercadopago/crear', mpDeshabilitado);
+app.get('/mercadopago/retorno', mpDeshabilitado);
+app.post('/mercadopago/webhook', (req, res) => {
+    res.status(200).send('OK');
 });
 
-// PASO 2: Retorno desde Transbank (Soporta POST y GET con token_ws)
-// Transbank redirige aquí después de que el usuario interactúa con Webpay
-app.all('/transbank/retorno', async (req, res) => {
-    const token_ws = req.body?.token_ws || req.query?.token_ws;
-    const TBK_TOKEN = req.body?.TBK_TOKEN || req.query?.TBK_TOKEN;
-
-    if (!token_ws || TBK_TOKEN) {
-        // El usuario canceló el pago
-        return res.redirect('/checkout.html?pago=cancelado');
-    }
-
-    try {
-        // Confirmar la transacción con Transbank
-        const response = await tx.commit(token_ws);
-
-        // Buscar el pedido asociado al token
-        const pedidoResult = await pool.query(
-            'SELECT * FROM pedidos WHERE transbank_token=$1', [token_ws]
-        );
-        const pedido = pedidoResult.rows[0];
-
-        if (!pedido) {
-            return res.redirect('/checkout.html?pago=error');
-        }
-
-        if (response.response_code === 0) {
-            // PAGO APROBADO
-            await pool.query(
-                `UPDATE pedidos SET estado='pagado', transbank_auth_code=$1,
-                 transbank_card_number=$2 WHERE id=$3`,
-                [response.authorization_code, response.card_detail?.card_number, pedido.id]
-            );
-
-            // Generar el envío en Chilexpress automáticamente (no bloquea la compra si falla)
-            try {
-                await generarEnvioParaPedido(pedido.id);
-            } catch (chxErr) {
-                console.error('No se pudo generar el envío Chilexpress automáticamente:', chxErr.response?.data || chxErr.message);
-            }
-
-            // Redirigir a página de gracias
-            res.redirect(`/gracias.html?orden=ORD-${pedido.id}&total=${pedido.total}&tipo=webpay`);
-
-        } else {
-
-            // PAGO RECHAZADO
-            await pool.query(
-                'UPDATE pedidos SET estado=$1 WHERE id=$2',
-                [`rechazado_${response.response_code}`, pedido.id]
-            );
-            res.redirect(`/checkout.html?pago=rechazado&codigo=${response.response_code}`);
-        }
-
-    } catch (err) {
-        console.error('Transbank retorno:', err);
-        res.redirect('/checkout.html?pago=error');
-    }
-});
 
 // ============================================================
 // RUTAS: CHILEXPRESS (ENVÍOS)
@@ -425,11 +494,10 @@ async function generarEnvioParaPedido(pedido_id) {
     return { ot, certificado, etiqueta };
 }
 
-// POST /chilexpress/generar/:pedido_id
+// POST /chilexpress/generar/:pedido_id (ADMIN ONLY)
 // Genera (o regenera) el envío para un pedido puntual.
-// Úsalo para pedidos pagados por transferencia/efectivo una vez confirmados,
-// ya que esos métodos no disparan la generación automática como Webpay.
-app.post('/chilexpress/generar/:pedido_id', async (req, res) => {
+// Úsalo para pedidos pagados por transferencia una vez confirmados.
+app.post('/chilexpress/generar/:pedido_id', authMiddleware, async (req, res) => {
     try {
         const resultado = await generarEnvioParaPedido(req.params.pedido_id);
         res.json({ ok: true, ...resultado });
@@ -514,10 +582,10 @@ app.get('/chilexpress/comunas/:regionId', async (req, res) => {
     }
 });
 
-// GET /chilexpress/certificado/:pedido_id
+// GET /chilexpress/certificado/:pedido_id (ADMIN ONLY)
 // Descarga el certificado de la OT generada para un pedido.
 // Requiere que el pedido ya tenga chilexpress_certificado guardado.
-app.get('/chilexpress/certificado/:pedido_id', async (req, res) => {
+app.get('/chilexpress/certificado/:pedido_id', authMiddleware, async (req, res) => {
     try {
         const pedidoRes = await pool.query(
             'SELECT chilexpress_certificado, chilexpress_ot FROM pedidos WHERE id=$1',
@@ -551,7 +619,12 @@ app.get('/chilexpress/certificado/:pedido_id', async (req, res) => {
 app.get('/health', async (req, res) => {
     try {
         await pool.query('SELECT 1');
-        res.json({ status: 'ok', db: 'connected' });
+        res.json({
+            status: 'ok',
+            db: 'connected',
+            metodos_pago: METODOS_PAGO_ACTIVOS,
+            entorno: esProduccion ? 'producción' : 'desarrollo'
+        });
     } catch (err) {
         res.status(500).json({ status: 'error', db: 'disconnected' });
     }
@@ -564,6 +637,7 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`✅ CAR CENTER API corriendo en puerto ${PORT}`);
     console.log(`🗄️  Neon PostgreSQL conectado`);
-    console.log(`💳 Transbank Webpay en modo: ${esProduccion ? 'PRODUCCIÓN' : 'INTEGRACIÓN (pruebas)'}`);
+    console.log(`💳 Pago activo: Transferencia bancaria (Mercado Pago API ${mpClient ? 'configurado pero deshabilitado' : 'no configurado'})`);
     console.log(`📦 Chilexpress en modo: ${process.env.CHILEXPRESS_ENV === 'production' ? 'PRODUCCIÓN' : 'PRUEBAS'} (${chilexpress.CHX_BASE_URL})`);
+    console.log(`🔒 Entorno: ${esProduccion ? 'PRODUCCIÓN' : 'DESARROLLO'}`);
 });

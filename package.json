@@ -15,8 +15,8 @@
         "express-rate-limit": "^8.7.0",
         "express-validator": "^7.3.2",
         "helmet": "^8.3.0",
+        "mercadopago": "^3.6.1",
         "pg": "^8.11.3",
-        "transbank-sdk": "^4.0.0",
         "xss-clean": "^0.1.4"
     },
     "devDependencies": {

@@ -48,11 +48,61 @@
         <div class="success-icon">
             <i class="bi bi-check-circle-fill"></i>
         </div>
-        <h1 class="display-4 mb-3">¡Gracias por tu compra!</h1>
+        <h1 class="display-4 mb-3">¡Gracias por tu pedido!</h1>
         <p class="lead mb-4">Hemos recibido tu pedido correctamente</p>
         
         <div id="detalle-orden" class="mb-4">
             <!-- Se llena con JavaScript -->
+        </div>
+
+        <!-- Instrucciones de transferencia -->
+        <div id="transferencia-instrucciones" class="alert alert-primary text-start mx-auto" style="max-width: 500px; display:none;">
+            <h5 class="mb-3"><i class="bi bi-bank2 text-primary"></i> Realiza tu transferencia</h5>
+            <div class="row g-2 mb-3" style="font-size:14px;">
+                <div class="col-6">
+                    <div class="bg-white p-2 rounded border">
+                        <div class="text-muted" style="font-size:11px;">Titular</div>
+                        <strong>ALCSE SPA</strong>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="bg-white p-2 rounded border">
+                        <div class="text-muted" style="font-size:11px;">RUT</div>
+                        <strong>78.254.962-6</strong>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="bg-white p-2 rounded border">
+                        <div class="text-muted" style="font-size:11px;">N° Cuenta</div>
+                        <strong>1070657404</strong>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="bg-white p-2 rounded border">
+                        <div class="text-muted" style="font-size:11px;">Tipo / Banco</div>
+                        <strong>Cuenta Vista · Mercado Pago</strong>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="bg-white p-2 rounded border">
+                        <div class="text-muted" style="font-size:11px;">Email</div>
+                        <strong>Alcrison@gmail.com</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="p-2 bg-warning-subtle rounded mb-3" style="font-size:13px;">
+                <i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>
+                <strong>Monto a transferir:</strong> <span id="monto-transferencia" class="text-danger fw-bold">$0</span><br>
+                <strong>Asunto:</strong> <span id="asunto-transferencia" class="text-primary fw-bold">ORD-XXX</span>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <a id="btn-whatsapp" href="#" class="btn btn-success rounded-pill" target="_blank">
+                    <i class="bi bi-whatsapp me-1"></i> Enviar comprobante por WhatsApp
+                </a>
+                <a href="mailto:Alcrison@gmail.com?subject=Comprobante de transferencia" class="btn btn-outline-primary rounded-pill">
+                    <i class="bi bi-envelope me-1"></i> Enviar por email
+                </a>
+            </div>
         </div>
 
         <div id="chilexpress-tracking" class="alert alert-light border text-start mx-auto" style="max-width: 400px; display:none;">
@@ -61,9 +111,9 @@
             <p class="mb-0 text-muted" id="chx-estado" style="font-size:13px;"></p>
         </div>
 
-        <div class="alert alert-info text-start mx-auto" style="max-width: 400px;">
+        <div id="pasos-siguientes" class="alert alert-info text-start mx-auto" style="max-width: 400px;">
             <h5><i class="bi bi-envelope"></i> Próximos pasos:</h5>
-            <ul class="mb-0">
+            <ul class="mb-0" id="lista-pasos">
                 <li>Recibirás un email con la confirmación</li>
                 <li>Prepararemos tu pedido en 24-48 hrs</li>
                 <li>Te contactaremos cuando esté listo con tu N° de seguimiento Chilexpress</li>
@@ -78,29 +128,65 @@
 
 <script src="config.js"></script>
 <script>
-// Mostrar detalles de la orden
+// Utilidad de sanitización
+function escapeHtml(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = String(str);
+    return div.innerHTML;
+}
+
+// Mostrar detalles de la orden con sanitización
 const urlParams = new URLSearchParams(window.location.search);
-const orden = urlParams.get('orden');
-const total = urlParams.get('total');
-const tipo = urlParams.get('tipo');
+const orden = escapeHtml(urlParams.get('orden') || '');
+const total = parseInt(urlParams.get('total') || '0') || 0;
+const tipo = escapeHtml(urlParams.get('tipo') || '');
 
 const detalle = document.getElementById('detalle-orden');
 
 if (orden) {
     let mensaje = `<div class="order-number">Orden: ${orden}</div>`;
     if (total) {
-        mensaje += `<p class="h4">Total: $${parseInt(total).toLocaleString('es-CL')}</p>`;
-    }
-    if (tipo === 'efectivo') {
-        mensaje += `<p class="text-warning"><i class="bi bi-cash-stack"></i> Pago en efectivo al retirar</p>`;
+        mensaje += `<p class="h4">Total: $${total.toLocaleString('es-CL')}</p>`;
     }
     detalle.innerHTML = mensaje;
 }
 
-// Consultar el N° de seguimiento Chilexpress (puede tardar unos segundos en generarse tras el pago)
+// Mostrar instrucciones de transferencia
+if (tipo === 'transferencia') {
+    const instrBox = document.getElementById('transferencia-instrucciones');
+    instrBox.style.display = 'block';
+    
+    document.getElementById('monto-transferencia').textContent = `$${total.toLocaleString('es-CL')}`;
+    document.getElementById('asunto-transferencia').textContent = orden || 'ORD-XXX';
+    
+    // Armar link de WhatsApp con datos del pedido
+    const waMsg = encodeURIComponent(`Hola, acabo de realizar una transferencia para mi pedido ${orden} por $${total.toLocaleString('es-CL')}. Adjunto el comprobante.`);
+    document.getElementById('btn-whatsapp').href = `https://wa.me/56977137165?text=${waMsg}`;
+    
+    // Actualizar pasos para transferencia
+    document.getElementById('lista-pasos').innerHTML = `
+        <li><strong>Realiza la transferencia</strong> con los datos indicados arriba</li>
+        <li><strong>Envía el comprobante</strong> por WhatsApp o email</li>
+        <li>Confirmamos tu pago en <strong>máximo 24 hrs</strong></li>
+        <li>Preparamos tu pedido y te enviamos el <strong>N° de seguimiento Chilexpress</strong></li>
+    `;
+}
+
+// Si fue pago en efectivo (futuro)
+if (tipo === 'efectivo') {
+    document.getElementById('lista-pasos').innerHTML = `
+        <li>Tu pedido ha sido reservado</li>
+        <li>Retira y paga en tienda en un máximo de 48 hrs</li>
+        <li>Dirección: Av. Principal 123, Santiago</li>
+    `;
+}
+
+// Consultar el N° de seguimiento Chilexpress
 const API_URL = window.API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://localhost:3000'
     : 'https://carcenter-api.onrender.com');
+
 if (orden) {
     const pedidoId = orden.replace('ORD-', '');
     fetch(`${API_URL}/chilexpress/rastreo/${pedidoId}`)
