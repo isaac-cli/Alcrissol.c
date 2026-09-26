@@ -359,6 +359,18 @@ app.post('/pedidos', pedidosLimiter, [
     }
 });
 
+// GET /pedidos - listar todos los pedidos (ADMIN ONLY)
+app.get('/pedidos', authMiddleware, async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM pedidos ORDER BY id DESC');
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error al obtener los pedidos' });
+    }
+});
+
+
 // GET /pedidos/:id - ver un pedido (ADMIN ONLY)
 app.get('/pedidos/:id', authMiddleware, async (req, res) => {
     try {

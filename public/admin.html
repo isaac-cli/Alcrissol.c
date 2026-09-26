@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - Car Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <div id="login-overlay" class="overlay">
+        <div class="glass-panel login-box">
+            <h2>Acceso Admin</h2>
+            <p>Ingresa la llave maestra para continuar</p>
+            <input type="password" id="api-key" placeholder="ADMIN_API_KEY">
+            <button id="btn-login" class="btn primary">Ingresar</button>
+            <p id="login-error" class="error-text"></p>
+        </div>
+    </div>
+
+    <div class="admin-layout" style="display: none;" id="admin-dashboard">
+        <aside class="sidebar glass-panel">
+            <div class="sidebar-header">
+                <h2>Car Center</h2>
+                <span class="badge">Admin</span>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="active">📦 Pedidos</a>
+                <a href="/">🏠 Volver a Tienda</a>
+                <a href="#" id="btn-logout" style="color: #ff6b6b; margin-top: auto;">🚪 Salir</a>
+            </nav>
+        </aside>
+        
+        <main class="main-content">
+            <header class="main-header glass-panel">
+                <h1>Gestión de Pedidos</h1>
+                <button id="btn-refresh" class="btn secondary">Actualizar Datos</button>
+            </header>
+            
+            <div class="content-wrapper glass-panel">
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Orden</th>
+                                <th>Fecha</th>
+                                <th>Monto Total</th>
+                                <th>Pago</th>
+                                <th>Estado Tienda</th>
+                                <th>OT Chilexpress</th>
+                                <th>Estado Envío</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-tbody">
+                            <!-- JS will populate this -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal for Order Details -->
+    <div id="order-modal" class="overlay" style="display: none;">
+        <div class="glass-panel modal-box">
+            <div class="modal-header">
+                <h2 id="modal-title">Detalles del Pedido</h2>
+                <button id="btn-close-modal" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="grid-2">
+                    <div class="info-card">
+                        <h3>📋 Datos del Envío</h3>
+                        <p><strong>Cliente ID:</strong> <span id="modal-email-placeholder">Encriptado</span></p>
+                        <p><strong>Teléfono:</strong> <span id="modal-tel-placeholder">Encriptado</span></p>
+                        <div class="shipping-box">
+                            <strong>Dirección de entrega:</strong><br>
+                            <span id="modal-direccion">Cargando...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h3>🛠️ Acciones y Estado</h3>
+                        <div class="form-group">
+                            <label>Estado en tienda:</label>
+                            <select id="modal-estado" class="form-control">
+                                <option value="pendiente">Pendiente</option>
+                                <option value="pagado">Pagado</option>
+                                <option value="preparando">Preparando</option>
+                                <option value="enviado">Enviado</option>
+                                <option value="entregado">Entregado</option>
+                                <option value="cancelado">Cancelado</option>
+                            </select>
+                            <button id="btn-update-status" class="btn primary small mt-2">Guardar Estado</button>
+                        </div>
+                        
+                        <hr class="divider">
+                        
+                        <div id="chilexpress-actions">
+                            <p><strong>Chilexpress OT:</strong> <span class="badge chx-badge" id="modal-chx-ot">No generado</span></p>
+                            <p id="chx-error" class="error-text" style="display:none"></p>
+                            <div class="action-buttons mt-2">
+                                <button id="btn-generate-shipping" class="btn chx-btn small">🚚 Generar Envío Chilexpress</button>
+                                <a id="btn-download-label" class="btn primary small" target="_blank" style="display:none">📄 Ver Etiqueta</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <h3 class="mt-4">🛍️ Productos</h3>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Img</th>
+                                <th>Producto</th>
+                                <th>Cantidad</th>
+                                <th>Precio Unit.</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modal-products"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="toast" class="toast">Notificación</div>
+
+    <script src="admin.js"></script>
+</body>
+</html>
