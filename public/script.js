@@ -19,7 +19,7 @@ let categoriaActual = 'destacados';
 // ========== IMÁGENES VECTORIALES BASE64 (SVG FALLBACKS LIMPIOS) ==========
 function getCategoryFallbackImage(category) {
     const svgs = {
-        neumaticos: `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200"><rect width="300" height="200" fill="#f8f9fa"/><circle cx="150" cy="95" r="55" fill="#212121"/><circle cx="150" cy="95" r="35" fill="#424242"/><circle cx="150" cy="95" r="18" fill="#D32F2F"/><text x="150" y="175" font-family="sans-serif" font-size="13" font-weight="800" fill="#333" text-anchor="middle">NEUMÁTICO ALCRISOL</text></svg>`,
+        neumaticos: `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200"><rect width="300" height="200" fill="#f8f9fa"/><circle cx="150" cy="95" r="55" fill="#212121"/><circle cx="150" cy="95" r="35" fill="#424242"/><circle cx="150" cy="95" r="18" fill="#D32F2F"/><text x="150" y="175" font-family="sans-serif" font-size="13" font-weight="800" fill="#333" text-anchor="middle">NEUMÁTICO Alcrison</text></svg>`,
         iluminacion: `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200"><rect width="300" height="200" fill="#1a1a2e"/><path d="M150 35 L175 85 L125 85 Z" fill="#ffeb3b"/><circle cx="150" cy="105" r="30" fill="#ffffff" stroke="#ffeb3b" stroke-width="4"/><text x="150" y="175" font-family="sans-serif" font-size="13" font-weight="800" fill="#ffeb3b" text-anchor="middle">ILUMINACIÓN LED</text></svg>`,
         plumillas: `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200"><rect width="300" height="200" fill="#f8f9fa"/><path d="M50 130 Q 150 40 250 130" fill="none" stroke="#D32F2F" stroke-width="8" stroke-linecap="round"/><path d="M60 135 Q 150 48 240 135" fill="none" stroke="#212121" stroke-width="4"/><text x="150" y="175" font-family="sans-serif" font-size="13" font-weight="800" fill="#333" text-anchor="middle">PLUMILLA AUTOMOTRIZ</text></svg>`,
         refrigerantes: `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200"><rect width="300" height="200" fill="#f8f9fa"/><rect x="110" y="50" width="80" height="95" rx="10" fill="#0288d1"/><rect x="130" y="30" width="40" height="20" rx="4" fill="#212121"/><text x="150" y="105" font-family="sans-serif" font-size="14" font-weight="800" fill="#fff" text-anchor="middle">PRESTONE</text><text x="150" y="175" font-family="sans-serif" font-size="13" font-weight="800" fill="#333" text-anchor="middle">REFRIGERANTE MAX</text></svg>`,
@@ -50,7 +50,7 @@ function adaptProduct(p, idx) {
         stock: stock,
         image: image,
         category: category,
-        brand: (p.marca || 'Alcrisol').toUpperCase(),
+        brand: (p.marca || 'Alcrison').toUpperCase(),
         badge: stock > 0 ? (precio > 50000 ? 'Envío Gratis' : 'Destacado') : 'Agotado',
         description: p.descripcion || 'Producto automotriz de alta calidad garantizada.',
         compatibility: p.compatibility || []

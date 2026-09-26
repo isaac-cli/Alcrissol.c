@@ -19,6 +19,7 @@ const modalTel = document.getElementById('modal-tel-placeholder');
 const modalDireccion = document.getElementById('modal-direccion');
 const modalEstado = document.getElementById('modal-estado');
 const btnUpdateStatus = document.getElementById('btn-update-status');
+const btnDeleteOrder = document.getElementById('btn-delete-order');
 const modalChxOt = document.getElementById('modal-chx-ot');
 const btnGenerateShipping = document.getElementById('btn-generate-shipping');
 const btnDownloadLabel = document.getElementById('btn-download-label');
@@ -233,6 +234,36 @@ btnUpdateStatus.addEventListener('click', async () => {
     } finally {
         btnUpdateStatus.textContent = 'Guardar Estado';
         btnUpdateStatus.disabled = false;
+    }
+});
+
+// Delete Order
+btnDeleteOrder.addEventListener('click', async () => {
+    if (!confirm('¿ESTÁS SEGURO? Esta acción borrará el pedido, sus detalles y dirección permanentemente de la base de datos y no se puede deshacer.')) return;
+    
+    const key = localStorage.getItem('admin_api_key');
+    btnDeleteOrder.textContent = 'Eliminando...';
+    btnDeleteOrder.disabled = true;
+    
+    try {
+        const res = await fetch(`${baseUrl}/pedidos/${currentOrderId}`, {
+            method: 'DELETE',
+            headers: { 'x-api-key': key }
+        });
+        
+        if (res.ok) {
+            showToast('Pedido eliminado exitosamente');
+            orderModal.style.display = 'none';
+            cargarPedidos(key); // Refresh
+        } else {
+            const data = await res.json();
+            throw new Error(data.error || 'Error al eliminar');
+        }
+    } catch (err) {
+        showToast(err.message, true);
+    } finally {
+        btnDeleteOrder.textContent = '🗑️ Eliminar Pedido';
+        btnDeleteOrder.disabled = false;
     }
 });
 

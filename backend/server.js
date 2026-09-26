@@ -1,5 +1,5 @@
 // ============================================================
-// CAR CENTER - API SERVER
+// ALCRISON ACCESORIOS - API SERVER
 // Base de datos: Neon PostgreSQL
 // Pagos: Transferencia bancaria (único método activo)
 // ============================================================
@@ -146,7 +146,7 @@ app.use(express.static(path.join(__dirname, '../public')));
 // (o te lo entrega tu ejecutivo junto con tu TCC).
 // ============================================================
 const REMITENTE = {
-    nombre: process.env.TIENDA_NOMBRE || 'CAR CENTER',
+    nombre: process.env.TIENDA_NOMBRE || 'ALCRISON ACCESORIOS',
     telefono: process.env.TIENDA_TELEFONO || '+56900000000',
     email: process.env.TIENDA_EMAIL || 'pedidos@carcenter.cl',
     calle: process.env.TIENDA_CALLE || 'Av. Principal',
@@ -442,6 +442,34 @@ app.patch('/pedidos/:id/estado', authMiddleware, async (req, res) => {
     }
 });
 
+// DELETE /pedidos/:id - eliminar pedido (ADMIN ONLY)
+app.delete('/pedidos/:id', authMiddleware, async (req, res) => {
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+        
+        // El pedido puede tener dirección y detalles asociados. Eliminamos en cascada o individualmente
+        await client.query('DELETE FROM direccion_envio WHERE pedido_id = $1', [req.params.id]);
+        await client.query('DELETE FROM detalle_pedido WHERE pedido_id = $1', [req.params.id]);
+        
+        const result = await client.query('DELETE FROM pedidos WHERE id = $1 RETURNING id', [req.params.id]);
+        
+        if (result.rowCount === 0) {
+            await client.query('ROLLBACK');
+            return res.status(404).json({ error: 'Pedido no encontrado' });
+        }
+        
+        await client.query('COMMIT');
+        res.json({ ok: true, message: 'Pedido eliminado exitosamente' });
+    } catch (err) {
+        await client.query('ROLLBACK');
+        console.error('Error al eliminar pedido:', err);
+        res.status(500).json({ error: 'Error al eliminar pedido' });
+    } finally {
+        client.release();
+    }
+});
+
 // ============================================================
 // RUTAS: MERCADO PAGO (DESHABILITADAS TEMPORALMENTE)
 // Se activarán cuando las credenciales estén configuradas.
@@ -651,7 +679,7 @@ app.get('/health', async (req, res) => {
 // ============================================================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`✅ CAR CENTER API corriendo en puerto ${PORT}`);
+    console.log(`✅ ALCRISON ACCESORIOS API corriendo en puerto ${PORT}`);
     console.log(`🗄️  Neon PostgreSQL conectado`);
     console.log(`💳 Pago activo: Transferencia bancaria (Mercado Pago API ${mpClient ? 'configurado pero deshabilitado' : 'no configurado'})`);
     console.log(`📦 Chilexpress en modo: ${process.env.CHILEXPRESS_ENV === 'production' ? 'PRODUCCIÓN' : 'PRUEBAS'} (${chilexpress.CHX_BASE_URL})`);
