@@ -1,5 +1,4 @@
-const API_URL = 'http://localhost:3000'; // Se ajusta según el entorno automáticamente
-const baseUrl = window.location.origin.includes('localhost') ? API_URL : '';
+const baseUrl = window.API_URL || 'http://localhost:3000';
 
 // DOM Elements
 const loginOverlay = document.getElementById('login-overlay');
